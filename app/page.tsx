@@ -39,10 +39,10 @@ export default function Home() {
             
             {/* Nav Links - Desktop */}
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#product" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Product</a>
+              <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">How It Works</a>
               <a href="#pricing" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Pricing</a>
               <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">FAQ</a>
-              <a href="#blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Blog</a>
+              <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Use Cases</a>
             </nav>
             
             {/* CTA */}
@@ -66,10 +66,10 @@ export default function Home() {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-[#1E1E2E]">
               <nav className="flex flex-col gap-4">
-                <a href="#product" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Product</a>
+                <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
                 <a href="#pricing" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
                 <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
-                <a href="#blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
+                <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Use Cases</a>
                 <a 
                   href="#hero" 
                   className="inline-flex items-center justify-center px-5 py-2.5 bg-[#FFBF00] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#e6ac00] transition-colors mt-2"
