@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ToneGen — Professional Frequency Generator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #08080F;
+            color: #dfe3e7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .waveform-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+        .glass-panel {
+            background: rgba(15, 15, 26, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-high": "#262b2e",
+                        "primary-fixed": "#41fce2",
+                        "error": "#ffb4ab",
+                        "background": "#08080F",
+                        "surface": "#0F0F1A",
+                        "tertiary-container": "#cdcada",
+                        "inverse-on-surface": "#2c3134",
+                        "outline-variant": "#1E1E2E",
+                        "surface-variant": "#313539",
+                        "on-surface": "#dfe3e7",
+                        "inverse-surface": "#dfe3e7",
+                        "tertiary-fixed-dim": "#c7c5d5",
+                        "secondary-fixed": "#ffdfa0",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#849490",
+                        "on-tertiary": "#302f3b",
+                        "inverse-primary": "#006b5e",
+                        "tertiary-fixed": "#e3e0f1",
+                        "primary-fixed-dim": "#00dfc6",
+                        "surface-container-lowest": "#0a0f12",
+                        "on-error": "#690005",
+                        "surface-dim": "#0f1417",
+                        "secondary-fixed-dim": "#fbbc00",
+                        "on-primary": "#003730",
+                        "surface-container": "#1b2023",
+                        "tertiary": "#e9e6f7",
+                        "secondary": "#ffe2ab",
+                        "surface-tint": "#00dfc6",
+                        "on-tertiary-fixed-variant": "#464552",
+                        "on-secondary-fixed": "#261a00",
+                        "surface-bright": "#353a3d",
+                        "surface-container-low": "#171c1f",
+                        "on-tertiary-fixed": "#1b1a26",
+                        "secondary-container": "#ffbf00",
+                        "primary": "#00E5CC",
+                        "on-primary-fixed": "#00201b",
+                        "on-secondary-fixed-variant": "#5c4300",
+                        "on-secondary": "#402d00",
+                        "on-surface-variant": "#b9cac5",
+                        "on-primary-fixed-variant": "#005047",
+                        "on-secondary-container": "#6d5000",
+                        "on-primary-container": "#006256",
+                        "on-background": "#dfe3e7",
+                        "on-tertiary-container": "#565562",
+                        "primary-container": "#00e5cc",
+                        "surface-container-highest": "#313539",
+                        "error-container": "#93000a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "touch-target": "44px",
+                        "xs": "8px",
+                        "margin-mobile": "20px",
+                        "base": "4px",
+                        "lg": "40px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "gutter": "16px",
+                        "sm": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Space Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Space Grotesk"],
+                        "display-lg-mobile": ["Space Grotesk"],
+                        "data-sm": ["JetBrains Mono"],
+                        "body-md": ["DM Sans"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-lg": ["DM Sans"]
+                    },
+                    fontSize: {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg-mobile": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "data-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "data-lg": ["32px", {"lineHeight": "1", "letterSpacing": "-0.04em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  
+    <meta property="og:title" content="Tone Generator - Generate Any Frequency in Seconds" />
+    <meta property="og:description" content="Free online tone generator for testing headphones, tuning instruments. No signup required." />
+    <meta property="og:image" content="assets/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="assets/og-image.png" />
+</head>
+<body class="font-body-md text-body-md selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full h-[64px] bg-background/80 backdrop-blur-md flex justify-between items-center px-margin-mobile z-50 border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<img src="assets/logo.png" alt="Tone Generator" class="h-7 w-auto" />
+<span class="font-display-lg-mobile text-headline-md text-primary tracking-tighter">TONEGEN</span>
+</div>
+<div class="cursor-pointer active:scale-95 transition-transform p-2">
+<span class="material-symbols-outlined text-primary text-[28px]">menu</span>
+</div>
+</nav>
+<main class="pt-[80px] pb-xl overflow-x-hidden">
+<!-- Hero Section -->
+<section class="px-margin-mobile mb-lg relative" style="background-image: url('assets/hero-bg.png'); background-size: cover; background-position: center;">
+<span class="font-label-caps text-[11px] text-primary tracking-widest block mb-xs">FREE ONLINE TOOL</span>
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-on-surface mb-sm">Generate Any Frequency in Seconds</h1>
+<p class="font-body-md text-body-md text-[#6B7280] mb-md leading-relaxed">
+                Test headphones, tune instruments, match tinnitus tones — all in your browser. Precision audio control for professionals.
+            </p>
+<button class="w-full h-touch-target bg-secondary-container text-on-secondary-fixed font-bold rounded-lg active:scale-[0.98] transition-transform shadow-lg shadow-secondary-container/10">
+                Start Testing — Free
+            </button>
+</section>
+<!-- Embedded Tool Section -->
+<section class="mx-margin-mobile bg-surface border border-outline-variant rounded-xl p-sm overflow-hidden mb-xl">
+<!-- Waveform Canvas -->
+<div class="w-full h-[100px] bg-background rounded-lg border border-outline-variant relative overflow-hidden mb-md flex items-center justify-center">
+<svg class="opacity-80" height="80" viewbox="0 0 400 80" width="100%">
+<path d="M0 40 Q 25 10, 50 40 T 100 40 T 150 40 T 200 40 T 250 40 T 300 40 T 350 40 T 400 40" fill="none" stroke="#00E5CC" stroke-width="2"></path>
+</svg>
+<div class="absolute inset-0 bg-gradient-to-r from-surface via-transparent to-surface pointer-events-none"></div>
+</div>
+<!-- Frequency Display -->
+<div class="flex flex-col items-center mb-md">
+<div class="flex items-baseline gap-1">
+<span class="font-label-caps text-[56px] text-[#E8ECF0]" id="freq-val">440</span>
+<span class="font-label-caps text-headline-md text-outline">Hz</span>
+</div>
+</div>
+<!-- Frequency Controls -->
+<div class="flex flex-col gap-md mb-md">
+<div class="flex items-center gap-sm">
+<input class="flex-1 h-[6px] bg-outline-variant rounded-full appearance-none cursor-pointer accent-primary" id="freq-slider" max="20000" min="20" type="range" value="440"/>
+<div class="w-[100px] h-[44px] bg-outline-variant rounded-lg border border-outline flex items-center justify-center font-label-caps text-primary">
+                        440.0
+                    </div>
+</div>
+</div>
+<!-- Waveform Grid -->
+<div class="grid grid-cols-2 gap-sm mb-md">
+<button class="h-touch-target border border-primary text-primary rounded-lg font-label-caps text-[12px] bg-primary/10">SINE</button>
+<button class="h-touch-target border border-outline-variant text-on-surface-variant rounded-lg font-label-caps text-[12px] hover:border-primary transition-colors">SQUARE</button>
+<button class="h-touch-target border border-outline-variant text-on-surface-variant rounded-lg font-label-caps text-[12px] hover:border-primary transition-colors">SAWTOOTH</button>
+<button class="h-touch-target border border-outline-variant text-on-surface-variant rounded-lg font-label-caps text-[12px] hover:border-primary transition-colors">TRIANGLE</button>
+</div>
+<!-- Volume Row -->
+<div class="flex items-center gap-sm mb-md px-xs">
+<span class="material-symbols-outlined text-outline">volume_up</span>
+<input class="flex-1 h-[4px] bg-outline-variant rounded-full appearance-none accent-primary" type="range"/>
+<span class="font-label-caps text-data-sm text-outline w-8">80%</span>
+</div>
+<!-- Main Play Button -->
+<button class="w-full py-4 bg-primary text-on-primary font-bold rounded-xl active:scale-[0.97] transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined fill-1" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                PLAY SIGNAL
+            </button>
+</section>
+<!-- How It Works Section -->
+<section class="px-margin-mobile mb-xl">
+<h2 class="font-display-lg-mobile text-headline-md mb-md text-on-surface">How it works</h2>
+<div class="flex flex-col gap-sm">
+<div class="bg-surface border border-outline-variant p-md rounded-xl relative overflow-hidden">
+<span class="absolute -right-4 -bottom-6 font-label-caps text-[80px] opacity-10 text-primary">01</span>
+<h3 class="font-headline-md text-primary mb-2">Select Wave</h3>
+<p class="text-[#6B7280]">Choose from four distinct waveform types to suit your specific testing requirements.</p>
+</div>
+<div class="bg-surface border border-outline-variant p-md rounded-xl relative overflow-hidden">
+<span class="absolute -right-4 -bottom-6 font-label-caps text-[80px] opacity-10 text-primary">02</span>
+<h3 class="font-headline-md text-primary mb-2">Set Frequency</h3>
+<p class="text-[#6B7280]">Slide or type any frequency from 20Hz up to 20,000Hz with sub-decimal precision.</p>
+</div>
+<div class="bg-surface border border-outline-variant p-md rounded-xl relative overflow-hidden">
+<span class="absolute -right-4 -bottom-6 font-label-caps text-[80px] opacity-10 text-primary">03</span>
+<h3 class="font-headline-md text-primary mb-2">Listen &amp; Test</h3>
+<p class="text-[#6B7280]">Hit play to output the pure signal through your speakers or headphones instantly.</p>
+</div>
+</div>
+</section>
+<!-- Use Cases Section -->
+<section class="px-margin-mobile mb-xl">
+<h2 class="font-display-lg-mobile text-headline-md mb-md text-on-surface">Primary Use Cases</h2>
+<div class="flex flex-col gap-sm">
+<div class="bg-surface border border-outline-variant p-md rounded-xl">
+<span class="font-label-caps text-[10px] text-primary border border-primary/30 px-2 py-0.5 rounded-full mb-xs inline-block">HEADPHONES</span>
+<h3 class="font-headline-md mb-xs">Sub-bass Testing</h3>
+<p class="text-[#6B7280] text-body-md">Verify the low-frequency response and driver clarity of high-end monitors.</p>
+</div>
+<div class="bg-surface border border-outline-variant p-md rounded-xl">
+<span class="font-label-caps text-[10px] text-primary border border-primary/30 px-2 py-0.5 rounded-full mb-xs inline-block">TINNITUS</span>
+<h3 class="font-headline-md mb-xs">Frequency Matching</h3>
+<p class="text-[#6B7280] text-body-md">Identify your phantom frequency for notch therapy or mask noise generation.</p>
+</div>
+<div class="bg-surface border border-outline-variant p-md rounded-xl">
+<span class="font-label-caps text-[10px] text-primary border border-primary/30 px-2 py-0.5 rounded-full mb-xs inline-block">ACOUSTICS</span>
+<h3 class="font-headline-md mb-xs">Room Resonance</h3>
+<p class="text-[#6B7280] text-body-md">Find standing waves and room nodes by sweeping through lower frequencies.</p>
+</div>
+</div>
+<p class="mt-md text-[12px] text-outline italic leading-snug">
+                Medical Disclaimer: This tool is not a medical device. High-volume exposure to pure frequencies can damage hearing. Use with caution.
+            </p>
+</section>
+<!-- Features Bento Section -->
+<section class="px-margin-mobile mb-xl">
+<h2 class="font-display-lg-mobile text-headline-md mb-md text-on-surface">Professional Features</h2>
+<div class="flex flex-col gap-sm">
+<div class="bg-surface-container-low border border-outline-variant p-sm rounded-lg flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">graphic_eq</span>
+</div>
+<div>
+<h4 class="font-headline-md text-body-lg">Full Range Output</h4>
+<p class="text-data-sm text-outline">Precise 20Hz to 20kHz coverage.</p>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-sm rounded-lg flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">waves</span>
+</div>
+<div>
+<h4 class="font-headline-md text-body-lg">Waveform Visualizer</h4>
+<p class="text-data-sm text-outline">Real-time vector signal rendering.</p>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-sm rounded-lg flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">share</span>
+</div>
+<div>
+<h4 class="font-headline-md text-body-lg">URL Sharing</h4>
+<p class="text-data-sm text-outline">Share specific tones via custom links.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="px-margin-mobile mb-xl">
+<h2 class="font-display-lg-mobile text-headline-md mb-md text-on-surface text-center">Flexible Plans</h2>
+<div class="flex flex-col gap-md">
+<!-- Free -->
+<div class="bg-surface border border-outline-variant p-md rounded-xl">
+<span class="font-label-caps text-outline text-[12px] mb-xs block">PERSONAL</span>
+<h3 class="font-headline-md mb-xs">Free</h3>
+<div class="font-label-caps text-[32px] text-on-surface mb-md">$0<span class="text-body-md text-outline">/mo</span></div>
+<ul class="flex flex-col gap-2 mb-md">
+<li class="flex items-center gap-2 text-data-sm text-outline"><span class="material-symbols-outlined text-primary text-sm">check</span> Ad-supported</li>
+<li class="flex items-center gap-2 text-data-sm text-outline"><span class="material-symbols-outlined text-primary text-sm">check</span> Standard waveforms</li>
+</ul>
+<button class="w-full py-3 border border-outline-variant rounded-lg font-bold text-on-surface">Current Plan</button>
+</div>
+<!-- Pro -->
+<div class="bg-surface border-2 border-primary p-md rounded-xl relative">
+<div class="absolute -top-3 right-md bg-primary text-on-primary font-label-caps text-[10px] px-2 py-1 rounded-full">MOST POPULAR</div>
+<span class="font-label-caps text-primary text-[12px] mb-xs block">ENGINEER</span>
+<h3 class="font-headline-md mb-xs text-primary">Pro</h3>
+<div class="font-label-caps text-[32px] text-on-surface mb-md">$4.99<span class="text-body-md text-outline">/mo</span></div>
+<ul class="flex flex-col gap-2 mb-md">
+<li class="flex items-center gap-2 text-data-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check</span> No Ads</li>
+<li class="flex items-center gap-2 text-data-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check</span> Multi-tone layering</li>
+<li class="flex items-center gap-2 text-data-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check</span> Mobile lock-screen support</li>
+</ul>
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-bold">Go Pro</button>
+</div>
+<!-- Lifetime -->
+<div class="bg-surface border border-outline-variant p-md rounded-xl">
+<span class="font-label-caps text-outline text-[12px] mb-xs block">LABORATORY</span>
+<h3 class="font-headline-md mb-xs">Lifetime</h3>
+<div class="font-label-caps text-[32px] text-on-surface mb-md">$29.99</div>
+<ul class="flex flex-col gap-2 mb-md">
+<li class="flex items-center gap-2 text-data-sm text-outline"><span class="material-symbols-outlined text-primary text-sm">check</span> All future features</li>
+<li class="flex items-center gap-2 text-data-sm text-outline"><span class="material-symbols-outlined text-primary text-sm">check</span> Priority support</li>
+</ul>
+<button class="w-full py-3 border border-outline-variant rounded-lg font-bold text-on-surface">Get Access</button>
+</div>
+</div>
+</section>
+<!-- FAQ Accordion -->
+<section class="px-margin-mobile mb-xl">
+<h2 class="font-display-lg-mobile text-headline-md mb-md text-on-surface">Frequency FAQ</h2>
+<div class="flex flex-col border-t border-outline-variant">
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">Is this tool accurate?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">Can it damage my ears?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">What is the highest frequency?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">Does it work offline?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">How do I test my bass?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">What waveform should I use?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">Is there a mobile app?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+<button class="flex justify-between items-center py-md border-b border-outline-variant text-left group">
+<span class="font-body-md text-on-surface">Can I export recordings?</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+</button>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="px-margin-mobile mb-xl text-center">
+<h2 class="font-display-lg-mobile text-[28px] mb-md leading-tight text-on-surface">You already know what frequency you need.</h2>
+<button class="w-full h-[64px] bg-secondary-container text-on-secondary-fixed font-bold rounded-xl text-body-lg shadow-2xl shadow-secondary-container/20 active:scale-[0.98] transition-transform">
+                Start Generating Frequency
+            </button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface border-t border-outline-variant py-lg px-margin-mobile flex flex-col items-center gap-md">
+<div class="font-label-caps text-primary text-[14px]">TONEGENERATOR</div>
+<div class="flex flex-wrap justify-center gap-sm">
+<a class="font-label-caps text-[10px] text-outline hover:text-primary transition-colors" href="#">TERMS OF SERVICE</a>
+<a class="font-label-caps text-[10px] text-outline hover:text-primary transition-colors" href="#">PRIVACY POLICY</a>
+<a class="font-label-caps text-[10px] text-outline hover:text-primary transition-colors" href="#">DOCUMENTATION</a>
+<a class="font-label-caps text-[10px] text-outline hover:text-primary transition-colors" href="#">SUPPORT</a>
+</div>
+<div class="text-[12px] text-outline font-data-sm opacity-50">
+            © 2026 SONIC PRECISION LABS
+        </div>
+</footer>
+<script>
+        const slider = document.getElementById('freq-slider');
+        const display = document.getElementById('freq-val');
+
+        slider.addEventListener('input', (e) => {
+            display.textContent = e.target.value;
+        });
+
+        // Simple haptic simulation on buttons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.style.transform = 'scale(0.96)';
+            });
+            btn.addEventListener('touchend', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>
