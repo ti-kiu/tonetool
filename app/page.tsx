@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import AudioEngine from "./components/AudioEngine";
 import CookieConsent from "./components/CookieConsent";
 import { 
-  Waveform, 
+  Waves, 
   Sliders, 
   Play, 
   Headphones, 
@@ -31,7 +31,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <Waveform className="w-6 h-6 text-[#00E5CC]" />
+              <Waves className="w-6 h-6 text-[#00E5CC]" />
               <span className="font-['Space_Grotesk',sans-serif] font-bold text-lg text-[#E8ECF0]">
                 Tone Generator
               </span>
@@ -80,7 +80,6 @@ export default function Home() {
               </nav>
             </div>
           )}
-          </div>
         </div>
       </header>
 
@@ -151,9 +150,9 @@ export default function Home() {
               },
               {
                 num: "02",
-                title: "Pick Your Waveform",
+                title: "Pick Your Waves",
                 desc: "Choose sine, square, triangle, or sawtooth — whatever your test needs.",
-                icon: Waveform
+                icon: Waves
               },
               {
                 num: "03",
@@ -513,7 +512,7 @@ export default function Home() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Waveform className="w-5 h-5 text-[#00E5CC]" />
+                <Waves className="w-5 h-5 text-[#00E5CC]" />
                 <span className="font-['Space_Grotesk',sans-serif] font-bold text-[#E8ECF0]">
                   Tone Generator
                 </span>
