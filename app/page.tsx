@@ -528,7 +528,7 @@ export default function Home() {
               <ul className="space-y-2">
                 {["Features", "Pricing", "FAQ", "Use Cases"].map((link) => (
                   <li key={link}>
-                    <a href={`#${link.toLowerCase()}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+                    <a href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
                       {link}
                     </a>
                   </li>
