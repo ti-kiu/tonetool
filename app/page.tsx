@@ -526,7 +526,7 @@ export default function Home() {
             <div>
               <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Product</h4>
               <ul className="space-y-2">
-                {["Features", "Pricing", "FAQ", "Blog"].map((link) => (
+                {["Features", "Pricing", "FAQ", "Use Cases"].map((link) => (
                   <li key={link}>
                     <a href={`#${link.toLowerCase()}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
                       {link}
