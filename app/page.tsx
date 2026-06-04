@@ -292,130 +292,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing - Free Only */}
       <section id="pricing" className="py-24 lg:py-32 bg-[#0A0A12]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
             <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
               Pricing
             </p>
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">
-              Simple, Transparent Pricing
+              Completely Free
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Free */}
-            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-2">
-                Free
-              </h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="font-['Space_Grotesk',sans-serif] text-5xl font-bold text-[#E8ECF0]">$0</span>
-                <span className="text-[#6B7280]">/ forever</span>
-              </div>
-              <p className="text-[#6B7280] mb-6">
-                Casual testing, headphone checks, quick frequency lookups
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "All frequency generation (1Hz–20kHz)",
-                  "4 waveforms: sine, square, triangle, sawtooth",
-                  "Real-time visualization",
-                  "URL sharing",
-                  "Mobile support"
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-[#E8ECF0]">
-                    <Check className="w-5 h-5 text-[#00E5CC] flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href="#audio-tool" 
-                className="block w-full text-center py-3 border border-[#E8ECF0] text-[#E8ECF0] rounded-xl font-medium hover:bg-[#E8ECF0]/5 transition-colors"
-              >
-                Start Testing — Free
-              </a>
+          <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8 max-w-md mx-auto">
+            <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-2">
+              Free
+            </h3>
+            <div className="flex items-baseline gap-1 mb-4">
+              <span className="font-['Space_Grotesk',sans-serif] text-5xl font-bold text-[#E8ECF0]">$0</span>
+              <span className="text-[#6B7280]">/ forever</span>
             </div>
-            
-            {/* Pro - Highlighted */}
-            <div className="bg-[#0F0F1A] border-2 border-[#FFBF00] rounded-2xl p-8 relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#FFBF00] text-[#08080F] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md font-semibold">
-                Most Popular
-              </span>
-              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-2">
-                Pro
-              </h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="font-['Space_Grotesk',sans-serif] text-5xl font-bold text-[#E8ECF0]">$4.99</span>
-                <span className="text-[#6B7280]">/ month</span>
-              </div>
-              <p className="text-[#6B7280] mb-6">
-                Regular testers, audio professionals, students who need export
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Everything in Free",
-                  "No ads",
-                  "Advanced waveforms (pulse, noise)",
-                  "Export audio as WAV",
-                  "Frequency sweep mode",
-                  "Save custom presets"
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-[#E8ECF0]">
-                    <Check className="w-5 h-5 text-[#00E5CC] flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href="https://checkout.creem.io/buy/YOUR-PRO-LINK" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center py-3 bg-[#FFBF00] text-[#08080F] rounded-xl font-semibold hover:bg-[#e6ac00] transition-colors"
-              >
-                Go Pro — $4.99/month
-              </a>
-            </div>
-            
-            {/* Lifetime */}
-            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-2">
-                Lifetime
-              </h3>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="font-['Space_Grotesk',sans-serif] text-5xl font-bold text-[#E8ECF0]">$29.99</span>
-                <span className="text-[#6B7280]">one-time</span>
-              </div>
-              <p className="text-[#6B7280] mb-6">
-                Power users who want permanent access
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Everything in Pro",
-                  "Lifetime updates",
-                  "No recurring payments"
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-[#E8ECF0]">
-                    <Check className="w-5 h-5 text-[#00E5CC] flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href="https://checkout.creem.io/buy/YOUR-LIFETIME-LINK" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center py-3 border border-[#00E5CC] text-[#00E5CC] rounded-xl font-medium hover:bg-[#00E5CC]/5 transition-colors"
-              >
-                Claim Lifetime Access
-              </a>
-            </div>
+            <p className="text-[#6B7280] mb-6">
+              All features are free while we grow. No credit card required.
+            </p>
+            <ul className="space-y-3 mb-8">
+              {[
+                "All frequency generation (1Hz–20kHz)",
+                "4 waveforms: sine, square, triangle, sawtooth",
+                "Real-time visualization",
+                "URL sharing",
+                "Mobile support"
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-3 text-[#E8ECF0]">
+                  <Check className="w-5 h-5 text-[#00E5CC] flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <a 
+              href="#audio-tool" 
+              className="block w-full text-center py-3 bg-[#00E5CC] text-[#08080F] rounded-xl font-semibold hover:bg-[#00E5CC]/90 transition-colors"
+            >
+              Start Testing — Free
+            </a>
           </div>
           
           <p className="text-center text-sm text-[#6B7280] mt-8">
-            Cancel anytime via Creem Customer Portal · 14-day unconditional refund
+            Pro features coming later. Enjoy the free tool and share your feedback.
           </p>
         </div>
       </section>
