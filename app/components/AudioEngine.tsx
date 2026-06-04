@@ -122,63 +122,70 @@ export default function AudioEngine() {
     draw();
   }, []);
 
-  const play = useCallback(async () => {
-    // Create or get AudioContext synchronously inside user gesture
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    }
-    const ctx = audioContextRef.current;
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    // Resume if suspended — must happen inside user gesture
-    if (ctx.state === 'suspended') {
-      try {
-        await ctx.resume();
-      } catch {
-        // If resume fails, we can't play audio in this browser session
-        return;
+  const play = useCallback(() => {
+    setErrorMsg(null);
+    try {
+      // Create or get AudioContext synchronously inside user gesture
+      if (!audioContextRef.current) {
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AC) {
+          setErrorMsg('Your browser does not support Web Audio API.');
+          return;
+        }
+        audioContextRef.current = new AC();
       }
+      const ctx = audioContextRef.current;
+
+      // Resume if suspended — must happen inside user gesture
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      // Stop existing
+      if (oscillatorRef.current) {
+        oscillatorRef.current.stop();
+        oscillatorRef.current.disconnect();
+      }
+      if (analyserRef.current) {
+        analyserRef.current.disconnect();
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+
+      // Create analyser for visualization
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyserRef.current = analyser;
+
+      // Create oscillator
+      const osc = ctx.createOscillator();
+      osc.type = waveform;
+      osc.frequency.value = frequency;
+
+      // Create gain node for volume
+      const gain = ctx.createGain();
+      gain.gain.value = volume;
+
+      // Connect: osc -> gain -> analyser -> destination
+      osc.connect(gain);
+      gain.connect(analyser);
+      analyser.connect(ctx.destination);
+
+      // Start
+      osc.start();
+
+      oscillatorRef.current = osc;
+      gainNodeRef.current = gain;
+      setIsPlaying(true);
+
+      // Start visualization
+      drawWaveform();
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Audio playback failed. Please try again.');
     }
-
-    // Stop existing
-    if (oscillatorRef.current) {
-      oscillatorRef.current.stop();
-      oscillatorRef.current.disconnect();
-    }
-    if (analyserRef.current) {
-      analyserRef.current.disconnect();
-    }
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-
-    // Create analyser for visualization
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 2048;
-    analyserRef.current = analyser;
-
-    // Create oscillator
-    const osc = ctx.createOscillator();
-    osc.type = waveform;
-    osc.frequency.value = frequency;
-
-    // Create gain node for volume
-    const gain = ctx.createGain();
-    gain.gain.value = volume;
-
-    // Connect: osc -> gain -> analyser -> destination
-    osc.connect(gain);
-    gain.connect(analyser);
-    analyser.connect(ctx.destination);
-
-    // Start
-    osc.start();
-
-    oscillatorRef.current = osc;
-    gainNodeRef.current = gain;
-    setIsPlaying(true);
-
-    // Start visualization
-    drawWaveform();
   }, [frequency, volume, waveform, drawWaveform]);
 
   const stop = useCallback(() => {
@@ -282,12 +289,40 @@ export default function AudioEngine() {
         onVolumeChange={setVolume}
       />
 
+      {errorMsg && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+          {errorMsg}
+        </div>
+      )}
+
       {/* Waveform Visualization */}
-      <div ref={canvasContainerRef} className="mb-6 rounded-xl overflow-hidden border border-[#1E1E2E] bg-[#0F0F1A]">
+      <div ref={canvasContainerRef} className="mb-6 rounded-xl overflow-hidden border border-[#1E1E2E] bg-[#0F0F1A] relative">
         <canvas
           ref={canvasRef}
           className="w-full h-[120px] block"
         />
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1 bg-[#00E5CC]/20 rounded-full"
+                  style={{ height: `${20 + i * 15}%` }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {isPlaying && (
+          <div className="absolute top-3 right-3 flex items-center gap-2 px-2 py-1 bg-[#00E5CC]/10 rounded-md">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E5CC] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00E5CC]" />
+            </span>
+            <span className="text-[#00E5CC] text-xs font-medium">Playing</span>
+          </div>
+        )}
       </div>
 
       {/* Frequency Display */}
