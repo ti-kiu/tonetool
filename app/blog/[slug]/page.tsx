@@ -4,6 +4,9 @@ import { getPostBySlug, getAllPostSlugs } from '../../lib/blog';
 
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
+  if (slugs.length === 0) {
+    return [{ slug: 'placeholder' }];
+  }
   return slugs.map((slug) => ({ slug }));
 }
 
