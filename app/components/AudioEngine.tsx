@@ -73,13 +73,6 @@ export default function AudioEngine() {
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
-  const initAudio = useCallback(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    }
-    return audioContextRef.current;
-  }, []);
-
   const drawWaveform = useCallback(() => {
     const canvas = canvasRef.current;
     const analyser = analyserRef.current;
@@ -129,8 +122,22 @@ export default function AudioEngine() {
     draw();
   }, []);
 
-  const play = useCallback(() => {
-    const ctx = initAudio();
+  const play = useCallback(async () => {
+    // Create or get AudioContext synchronously inside user gesture
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    }
+    const ctx = audioContextRef.current;
+
+    // Resume if suspended — must happen inside user gesture
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch {
+        // If resume fails, we can't play audio in this browser session
+        return;
+      }
+    }
 
     // Stop existing
     if (oscillatorRef.current) {
@@ -172,7 +179,7 @@ export default function AudioEngine() {
 
     // Start visualization
     drawWaveform();
-  }, [frequency, volume, waveform, initAudio, drawWaveform]);
+  }, [frequency, volume, waveform, drawWaveform]);
 
   const stop = useCallback(() => {
     if (oscillatorRef.current) {

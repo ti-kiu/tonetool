@@ -48,10 +48,10 @@ export default function Home() {
             
             {/* CTA */}
             <a 
-              href="#hero" 
-              className="hidden md:inline-flex items-center px-5 py-2.5 bg-[#FFBF00] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#e6ac00] transition-colors"
+              href="#audio-tool" 
+              className="hidden md:inline-flex items-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors"
             >
-              Start Testing — Free
+              Open Tool
             </a>
             
             {/* Mobile menu button */}
@@ -72,11 +72,11 @@ export default function Home() {
                 <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
                 <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Use Cases</a>
                 <a 
-                  href="#hero" 
-                  className="inline-flex items-center justify-center px-5 py-2.5 bg-[#FFBF00] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#e6ac00] transition-colors mt-2"
+                  href="#audio-tool" 
+                  className="inline-flex items-center justify-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors mt-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Start Testing — Free
+                  Open Tool
                 </a>
               </nav>
             </div>
@@ -85,45 +85,30 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="pt-24 pb-20 lg:pt-32 lg:pb-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left - Copy */}
-            <div className="space-y-6">
-              <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC]">
-                Free Online Tool
-              </p>
-              <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-[56px] font-bold text-[#E8ECF0] leading-[1.1]">
-                Generate Any Frequency in Seconds
-              </h1>
-              <p className="text-lg text-[#6B7280] leading-relaxed max-w-[480px]">
-                Test headphones, tune instruments, match tinnitus tones — all in your browser. No download. No signup. Completely free.
-              </p>
-              <div className="flex flex-wrap gap-4 pt-2">
-                <a 
-                  href="#hero" 
-                  className="inline-flex items-center px-8 py-4 bg-[#FFBF00] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-[#e6ac00] transition-colors"
-                >
-                  Start Testing — Free
-                </a>
-                <a 
-                  href="#how-it-works" 
-                  className="inline-flex items-center px-6 py-4 text-[#00E5CC] font-medium text-sm hover:underline transition-all"
-                >
-                  See How It Works
-                </a>
-              </div>
-              <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">
-                No signup required · Works on mobile · 100% free
-              </p>
-            </div>
-            
-            {/* Right - Tool Panel */}
+      <section id="hero" className="pt-24 pb-12 lg:pt-28 lg:pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
+            Free Online Tool
+          </p>
+          <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">
+            Generate Any Frequency in Seconds
+          </h1>
+          <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">
+            Test headphones, tune instruments, match tinnitus tones — all in your browser. No download. No signup. Completely free.
+          </p>
+          <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">
+            No signup required · Works on mobile · 100% free
+          </p>
+        </div>
+      </section>
+
+      {/* Audio Tool - The CTA */}
+      <section id="audio-tool" className="pb-20 lg:pb-28">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8 shadow-[inset_0_0_60px_rgba(0,229,204,0.03)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#00E5CC]/5 to-transparent rounded-3xl pointer-events-none" />
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#00E5CC]/5 to-transparent rounded-3xl" />
-              <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 shadow-[inset_0_0_60px_rgba(0,229,204,0.03)]">
-                <AudioEngine />
-              </div>
+              <AudioEngine />
             </div>
           </div>
         </div>
@@ -346,9 +331,12 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 border border-[#E8ECF0] text-[#E8ECF0] rounded-xl font-medium hover:bg-[#E8ECF0]/5 transition-colors">
+              <a 
+                href="#audio-tool" 
+                className="block w-full text-center py-3 border border-[#E8ECF0] text-[#E8ECF0] rounded-xl font-medium hover:bg-[#E8ECF0]/5 transition-colors"
+              >
                 Start Testing — Free
-              </button>
+              </a>
             </div>
             
             {/* Pro - Highlighted */}
@@ -381,9 +369,14 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 bg-[#FFBF00] text-[#08080F] rounded-xl font-semibold hover:bg-[#e6ac00] transition-colors">
+              <a 
+                href="https://checkout.creem.io/buy/YOUR-PRO-LINK" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center py-3 bg-[#FFBF00] text-[#08080F] rounded-xl font-semibold hover:bg-[#e6ac00] transition-colors"
+              >
                 Go Pro — $4.99/month
-              </button>
+              </a>
             </div>
             
             {/* Lifetime */}
@@ -410,9 +403,14 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 border border-[#00E5CC] text-[#00E5CC] rounded-xl font-medium hover:bg-[#00E5CC]/5 transition-colors">
+              <a 
+                href="https://checkout.creem.io/buy/YOUR-LIFETIME-LINK" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center py-3 border border-[#00E5CC] text-[#00E5CC] rounded-xl font-medium hover:bg-[#00E5CC]/5 transition-colors"
+              >
                 Claim Lifetime Access
-              </button>
+              </a>
             </div>
           </div>
           
@@ -486,19 +484,19 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 lg:py-40 bg-gradient-to-b from-[#08080F] to-[#0A1518]">
+      <section className="py-24 lg:py-32 bg-gradient-to-b from-[#08080F] to-[#0A1518]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#E8ECF0] mb-6">
             You already know what frequency you need to hear.
           </h2>
-          <p className="text-lg text-[#6B7280] mb-10 max-w-lg mx-auto">
+          <p className="text-lg text-[#6B7280] mb-8 max-w-lg mx-auto">
             The hard part is finding a tool that works instantly, doesn't bombard you with ads, and runs on your phone.
           </p>
           <a 
-            href="#hero" 
-            className="inline-flex items-center px-10 py-5 bg-[#FFBF00] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-lg rounded-xl hover:bg-[#e6ac00] transition-colors"
+            href="#audio-tool" 
+            className="inline-flex items-center px-8 py-4 bg-[#00E5CC] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-[#00E5CC]/90 transition-colors"
           >
-            Start Testing — Free
+            Open Tone Generator
           </a>
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mt-4">
             No signup · No download · Works on any device
