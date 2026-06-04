@@ -43,7 +43,10 @@ export default function RefundPolicy() {
                   <li>Purchase date</li>
                   <li>Reason for refund (optional — helps us improve)</li>
                 </ul>
-                <p className="text-gray-500 italic mt-2">[Contact email will be added after domain email setup]</p>
+                <p className="text-gray-500 italic mt-2">
+                  Email us at{' '}
+                  <a href="mailto:support@tonetool.org" className="text-cyan-400 hover:underline">support@tonetool.org</a>
+                </p>
               </div>
             </div>
           </section>
@@ -75,7 +78,10 @@ export default function RefundPolicy() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">Contact</h2>
-            <p className="text-gray-500 italic">[Contact email will be added after domain email setup]</p>
+            <p className="text-gray-400 leading-relaxed">
+              Email us at{' '}
+              <a href="mailto:support@tonetool.org" className="text-cyan-400 hover:underline">support@tonetool.org</a>.
+            </p>
             <p className="text-gray-400 leading-relaxed mt-3">
               For refund-related privacy questions, see our{' '}
               <a href="/privacy" className="text-cyan-400 hover:underline">Privacy Policy</a>.

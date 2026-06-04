@@ -51,7 +51,11 @@ export default function CookieConsent() {
         ad_personalization: 'granted',
       });
       // Enable AdSense
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch {
+        // AdSense may not be initialized yet — ignore
+      }
     } else {
       window.gtag?.('consent', 'update', {
         ad_storage: 'denied',
@@ -62,13 +66,18 @@ export default function CookieConsent() {
   };
 
   const saveConsent = (analytics: boolean, advertising: boolean) => {
-    const prefs: ConsentPreferences = {
-      analytics,
-      advertising,
-      timestamp: new Date().toISOString(),
-    };
-    localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
-    applyConsent(prefs);
+    try {
+      const prefs: ConsentPreferences = {
+        analytics,
+        advertising,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
+      applyConsent(prefs);
+    } catch {
+      // localStorage may be disabled (private mode) — still apply consent for this session
+      applyConsent({ analytics, advertising, timestamp: new Date().toISOString() });
+    }
     setVisible(false);
     setShowPreferences(false);
   };

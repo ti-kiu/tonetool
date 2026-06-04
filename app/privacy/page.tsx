@@ -154,7 +154,7 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="text-gray-400 leading-relaxed">
               To exercise these rights, contact us at:{' '}
-              <span className="text-gray-500 italic">[contact email pending — will be updated after domain email setup]</span>
+              <a href="mailto:hello@tonetool.org" className="text-cyan-400 hover:underline">hello@tonetool.org</a>.
             </p>
           </section>
 
@@ -194,7 +194,8 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">11. Contact</h2>
             <p className="text-gray-400 leading-relaxed">
-              <span className="text-gray-500 italic">[Contact email will be added after domain email setup]</span>
+              For questions about this Privacy Policy, contact us at{' '}
+              <a href="mailto:hello@tonetool.org" className="text-cyan-400 hover:underline">hello@tonetool.org</a>.
             </p>
           </section>
         </div>

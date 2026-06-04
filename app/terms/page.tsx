@@ -144,7 +144,8 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">14. Contact</h2>
             <p className="text-gray-400 leading-relaxed">
-              <span className="text-gray-500 italic">[Contact email will be added after domain email setup]</span>
+              For questions about these Terms, contact us at{' '}
+              <a href="mailto:hello@tonetool.org" className="text-cyan-400 hover:underline">hello@tonetool.org</a>.
             </p>
           </section>
         </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AudioEngine from "./components/AudioEngine";
 import CookieConsent from "./components/CookieConsent";
+import Image from "next/image";
 import { 
   Waves, 
   Sliders, 
@@ -31,7 +32,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <Waves className="w-6 h-6 text-[#00E5CC]" />
+              <Image src="/assets/logo.svg" alt="Tone Generator" width={24} height={24} />
               <span className="font-['Space_Grotesk',sans-serif] font-bold text-lg text-[#E8ECF0]">
                 Tone Generator
               </span>
@@ -512,7 +513,7 @@ export default function Home() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Waves className="w-5 h-5 text-[#00E5CC]" />
+                <Image src="/assets/logo.svg" alt="Tone Generator" width={20} height={20} />
                 <span className="font-['Space_Grotesk',sans-serif] font-bold text-[#E8ECF0]">
                   Tone Generator
                 </span>
@@ -558,9 +559,9 @@ export default function Home() {
             {/* Contact */}
             <div>
               <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Contact</h4>
-              <p className="text-sm text-[#6B7280]">
-                [email placeholder]
-              </p>
+              <a href="mailto:hello@tonetool.org" className="text-sm text-[#6B7280] hover:text-[#00E5CC] transition-colors">
+                hello@tonetool.org
+              </a>
             </div>
           </div>
           

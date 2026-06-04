@@ -68,7 +68,7 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-XXXXXXXXXX', {
+              gtag('config', 'G-L7CZQ8T37C', {
                 'anonymize_ip': true,
                 'allow_google_signals': false,
                 'restricted_data_processing': true
@@ -85,7 +85,7 @@ export default function RootLayout({
         />
         <script
           async
-          src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
+          src="https://www.googletagmanager.com/gtag/js?id=G-L7CZQ8T37C"
         />
         {/* AdSense */}
         <script
