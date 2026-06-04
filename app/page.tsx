@@ -359,11 +359,11 @@ export default function Home() {
             {[
               {
                 q: "Is it really free?",
-                a: "Yes. The core tone generator is completely free — all waveforms, full frequency range, visualization, and mobile support. No signup needed. Pro adds advanced features for power users."
+                a: "Yes. The tone generator is completely free — all waveforms, full frequency range, visualization, and mobile support. No signup needed."
               },
               {
                 q: "Do I need to create an account?",
-                a: "No. The free tool works instantly in your browser. We don't collect your email or personal data for basic use."
+                a: "No. The tool works instantly in your browser. We don't collect your email or personal data for basic use."
               },
               {
                 q: "How accurate are the frequencies?",
@@ -375,19 +375,11 @@ export default function Home() {
               },
               {
                 q: "Is my audio data stored?",
-                a: "No. All audio generation happens locally in your browser. We never upload, store, or process your audio. Your settings are optionally saved in your browser's localStorage only."
-              },
-              {
-                q: "What happens if I cancel Pro?",
-                a: "You can cancel anytime through the Creem Customer Portal. You'll keep Pro access until the end of your billing period, then revert to the free version. Your presets won't be accessible until you resubscribe."
+                a: "No. All audio generation happens locally in your browser. We never upload, store, or process your audio."
               },
               {
                 q: "How is this different from onlinetonegenerator.com?",
                 a: "Three things: cleaner design (no cluttered interface), better mobile experience, and no intrusive ads. We focus on doing one thing well — generating precise tones instantly."
-              },
-              {
-                q: "Can I export the audio?",
-                a: "WAV export is available in Pro. Free users can record their browser output using system tools or upgrade to Pro for one-click export."
               }
             ].map((item, i) => (
               <details key={i} className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
