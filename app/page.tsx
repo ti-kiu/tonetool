@@ -43,6 +43,7 @@ export default function Home() {
               <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">How It Works</a>
               <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">FAQ</a>
               <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Use Cases</a>
+              <a href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Blog</a>
             </nav>
             
             {/* CTA */}
@@ -69,6 +70,7 @@ export default function Home() {
                 <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
                 <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
                 <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Use Cases</a>
+                <a href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
                 <a 
                   href="#audio-tool" 
                   className="inline-flex items-center justify-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors mt-2"
@@ -387,11 +389,11 @@ export default function Home() {
             <div>
               <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Product</h4>
               <ul className="space-y-2">
-                {["Features", "FAQ", "Use Cases"].map((link) => (
+                {["Features", "FAQ", "Use Cases", "Blog"].map((link) => (
                   <li key={link}>
-                    <a href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+                    <Link href={link === 'Blog' ? '/blog' : `#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
                       {link}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
