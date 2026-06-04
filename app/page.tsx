@@ -41,7 +41,6 @@ export default function Home() {
             {/* Nav Links - Desktop */}
             <nav className="hidden md:flex items-center gap-8">
               <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">How It Works</a>
-              <a href="#pricing" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Pricing</a>
               <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">FAQ</a>
               <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Use Cases</a>
             </nav>
@@ -68,7 +67,6 @@ export default function Home() {
             <div className="md:hidden py-4 border-t border-[#1E1E2E]">
               <nav className="flex flex-col gap-4">
                 <a href="#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
-                <a href="#pricing" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
                 <a href="#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
                 <a href="#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Use Cases</a>
                 <a 
@@ -292,57 +290,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing - Free Only */}
-      <section id="pricing" className="py-24 lg:py-32 bg-[#0A0A12]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
-              Pricing
-            </p>
-            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">
-              Completely Free
-            </h2>
-          </div>
-          
-          <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8 max-w-md mx-auto">
-            <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-2">
-              Free
-            </h3>
-            <div className="flex items-baseline gap-1 mb-4">
-              <span className="font-['Space_Grotesk',sans-serif] text-5xl font-bold text-[#E8ECF0]">$0</span>
-              <span className="text-[#6B7280]">/ forever</span>
-            </div>
-            <p className="text-[#6B7280] mb-6">
-              All features are free while we grow. No credit card required.
-            </p>
-            <ul className="space-y-3 mb-8">
-              {[
-                "All frequency generation (1Hz–20kHz)",
-                "4 waveforms: sine, square, triangle, sawtooth",
-                "Real-time visualization",
-                "URL sharing",
-                "Mobile support"
-              ].map((feature) => (
-                <li key={feature} className="flex items-center gap-3 text-[#E8ECF0]">
-                  <Check className="w-5 h-5 text-[#00E5CC] flex-shrink-0" />
-                  <span className="text-sm">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <a 
-              href="#audio-tool" 
-              className="block w-full text-center py-3 bg-[#00E5CC] text-[#08080F] rounded-xl font-semibold hover:bg-[#00E5CC]/90 transition-colors"
-            >
-              Start Testing — Free
-            </a>
-          </div>
-          
-          <p className="text-center text-sm text-[#6B7280] mt-8">
-            Pro features coming later. Enjoy the free tool and share your feedback.
-          </p>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section id="faq" className="py-24 lg:py-32 bg-[#08080F]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -440,7 +387,7 @@ export default function Home() {
             <div>
               <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Product</h4>
               <ul className="space-y-2">
-                {["Features", "Pricing", "FAQ", "Use Cases"].map((link) => (
+                {["Features", "FAQ", "Use Cases"].map((link) => (
                   <li key={link}>
                     <a href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
                       {link}
