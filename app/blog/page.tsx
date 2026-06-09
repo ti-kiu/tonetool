@@ -4,6 +4,9 @@ import { getAllPostsMeta } from '../lib/blog';
 export const metadata = {
   title: 'Blog — Tone Generator',
   description: 'Guides on headphone testing, tinnitus matching, instrument tuning, and audio frequency tools.',
+  alternates: {
+    canonical: 'https://tonetool.org/blog',
+  },
 };
 
 export default function BlogPage() {

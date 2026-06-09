@@ -16,6 +16,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: `${post.title} — Tone Generator Blog`,
     description: post.description,
+    alternates: {
+      canonical: `https://tonetool.org/blog/${params.slug}`,
+    },
   };
 }
 
