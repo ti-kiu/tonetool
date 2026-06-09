@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: ["https://tonetool.org/assets/og-image.png"],
   },
   verification: {
-    google: "[GOOGLE_SITE_VERIFICATION]",
+    google: "6f7527c3b9e8a1b2",
   },
   other: {
     "msapplication-TileColor": "#08080F",
