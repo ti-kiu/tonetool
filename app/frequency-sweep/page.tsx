@@ -34,13 +34,13 @@ export default function Page() {
       }
     } catch (e) {}
     try {
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
+      if (gainNodeRef.current) {
+        gainNodeRef.current.disconnect();
       }
     } catch (e) {}
     oscillatorRef.current = null;
     gainNodeRef.current = null;
-    audioContextRef.current = null;
+    // DON'T close audioContext — reuse it like homepage
   }, []);
 
   const startSweep = () => {
@@ -54,8 +54,29 @@ export default function Page() {
         return;
       }
       
-      const ctx = new AC();
-      audioContextRef.current = ctx;
+      // Reuse existing context or create new one
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AC();
+      }
+      const ctx = audioContextRef.current;
+      
+      // Resume if suspended
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      
+      // Stop any existing oscillator
+      if (oscillatorRef.current) {
+        try {
+          oscillatorRef.current.stop();
+          oscillatorRef.current.disconnect();
+        } catch (e) {}
+      }
+      if (gainNodeRef.current) {
+        try {
+          gainNodeRef.current.disconnect();
+        } catch (e) {}
+      }
       
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
