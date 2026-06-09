@@ -61,6 +61,8 @@ export default function RootLayout({
         {/* Favicon */}
         <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/assets/logo.png" />
+        {/* Sitemap */}
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         {/* GA4 with consent mode */}
         <script
           dangerouslySetInnerHTML={{
