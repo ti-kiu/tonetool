@@ -399,6 +399,32 @@ export default function Home() {
               </ul>
             </div>
             
+            {/* Tools */}
+            <div>
+              <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Tools</h4>
+              <ul className="space-y-2">
+                {[
+                  { label: "Headphone Test", href: "/headphone-test" },
+                  { label: "Tinnitus Match", href: "/tinnitus-frequency" },
+                  { label: "Sine Wave", href: "/sine-wave-generator" },
+                  { label: "Frequency Sweep", href: "/frequency-sweep" },
+                  { label: "Instrument Tuner", href: "/instrument-tuner" },
+                  { label: "Subwoofer Test", href: "/subwoofer-test" },
+                  { label: "Hearing Test", href: "/hearing-test" },
+                  { label: "Binaural Beats", href: "/binaural-beats" },
+                  { label: "White Noise", href: "/white-noise" },
+                  { label: "440Hz Tone", href: "/440hz" },
+                  { label: "432Hz Tone", href: "/432hz" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <a href={link.href} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
             {/* Legal */}
             <div>
               <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Legal</h4>
