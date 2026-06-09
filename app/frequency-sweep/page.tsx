@@ -81,17 +81,19 @@ export default function Page() {
         const freq = startFreq * Math.pow(endFreq / startFreq, prog);
         
         try {
-          if (osc && ctx.state !== 'closed') {
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          const currentOsc = oscillatorRef.current;
+          const currentCtx = audioContextRef.current;
+          if (currentOsc && currentCtx && currentCtx.state === 'running') {
+            currentOsc.frequency.setValueAtTime(freq, currentCtx.currentTime);
           }
         } catch (e) {}
         
         setCurrentFreq(Math.round(freq));
         setProgress(prog * 100);
         
-        if (prog < 1) {
+        if (prog < 1 && isSweeping) {
           sweepRef.current = requestAnimationFrame(animate);
-        } else {
+        } else if (prog >= 1) {
           cleanup();
           setIsSweeping(false);
           setProgress(0);
