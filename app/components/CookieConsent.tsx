@@ -13,8 +13,10 @@ const CONSENT_KEY = 'tonegen_cookie_consent';
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check if consent already given
     const stored = localStorage.getItem(CONSENT_KEY);
     if (!stored) {
@@ -96,7 +98,7 @@ export default function CookieConsent() {
     saveConsent(false, false);
   };
 
-  if (!visible) return null;
+  if (!mounted || !visible) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 p-4 md:p-6">
