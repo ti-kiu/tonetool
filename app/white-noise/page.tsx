@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import CookieConsent from "../components/CookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
@@ -12,12 +12,35 @@ export default function Page() {
   const [noiseType, setNoiseType] = useState<NoiseType>('white');
   const [volume, setVolume] = useState(0.3);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
 
-  const createNoiseBuffer = useCallback((ctx: AudioContext, type: NoiseType) => {
+  const cleanup = useCallback(() => {
+    try {
+      if (noiseNodeRef.current) {
+        noiseNodeRef.current.stop();
+        noiseNodeRef.current.disconnect();
+      }
+    } catch (e) {}
+    try {
+      if (gainNodeRef.current) {
+        gainNodeRef.current.disconnect();
+      }
+    } catch (e) {}
+    try {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    } catch (e) {}
+    noiseNodeRef.current = null;
+    gainNodeRef.current = null;
+    audioContextRef.current = null;
+  }, []);
+
+  const createNoiseBuffer = (ctx: AudioContext, type: NoiseType) => {
     const bufferSize = ctx.sampleRate * 2;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -51,56 +74,69 @@ export default function Page() {
     }
     
     return buffer;
-  }, []);
+  };
 
-  const startNoise = useCallback(() => {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    audioContextRef.current = ctx;
+  const startNoise = () => {
+    if (isPlaying) return;
+    setErrorMsg(null);
     
-    const buffer = createNoiseBuffer(ctx, noiseType);
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(volume, ctx.currentTime);
-    
-    source.connect(gain);
-    gain.connect(ctx.destination);
-    source.start();
-    
-    noiseNodeRef.current = source;
-    gainNodeRef.current = gain;
-    setIsPlaying(true);
-  }, [noiseType, volume, createNoiseBuffer]);
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMsg('Your browser does not support Web Audio API. Please use Chrome, Safari, or Edge.');
+        return;
+      }
+      
+      cleanup();
+      
+      const ctx = new AC();
+      audioContextRef.current = ctx;
+      
+      const buffer = createNoiseBuffer(ctx, noiseType);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(volume, ctx.currentTime);
+      
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      
+      noiseNodeRef.current = source;
+      gainNodeRef.current = gain;
+      setIsPlaying(true);
+    } catch (err: any) {
+      setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
+      cleanup();
+    }
+  };
 
-  const stopNoise = useCallback(() => {
-    if (noiseNodeRef.current) {
-      noiseNodeRef.current.stop();
-      noiseNodeRef.current.disconnect();
-    }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
+  const stopNoise = () => {
+    cleanup();
     setIsPlaying(false);
-  }, []);
+  };
 
-  useEffect(() => {
+  const switchNoiseType = (type: NoiseType) => {
+    setNoiseType(type);
     if (isPlaying) {
-      stopNoise();
-      setTimeout(startNoise, 50);
+      // Restart with new type
+      setTimeout(() => {
+        cleanup();
+        startNoise();
+      }, 50);
     }
-  }, [noiseType]);
+  };
 
-  useEffect(() => {
-    if (gainNodeRef.current && audioContextRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(volume, audioContextRef.current.currentTime);
+  const handleVolumeChange = (newVol: number) => {
+    setVolume(newVol);
+    if (gainNodeRef.current && audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      try {
+        gainNodeRef.current.gain.setValueAtTime(newVol, audioContextRef.current.currentTime);
+      } catch (e) {}
     }
-  }, [volume]);
-
-  useEffect(() => {
-    return () => stopNoise();
-  }, [stopNoise]);
+  };
 
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
@@ -132,17 +168,15 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Noise Tool */}
       <section className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
             
-            {/* Noise Type Selection */}
             <div className="grid grid-cols-3 gap-3 mb-8">
               {(['white', 'pink', 'brown'] as NoiseType[]).map((type) => (
                 <button
                   key={type}
-                  onClick={() => setNoiseType(type)}
+                  onClick={() => switchNoiseType(type)}
                   className={`py-3 px-4 rounded-xl text-sm font-medium transition capitalize ${
                     noiseType === type
                       ? 'bg-[#00E5CC] text-[#08080F]'
@@ -154,7 +188,6 @@ export default function Page() {
               ))}
             </div>
 
-            {/* Visualizer Placeholder */}
             <div className="mb-8 rounded-xl overflow-hidden border border-[#1E1E2E] bg-[#08080F] h-[120px] flex items-center justify-center">
               {isPlaying ? (
                 <div className="flex items-end gap-1 h-[60px]">
@@ -174,7 +207,6 @@ export default function Page() {
               )}
             </div>
 
-            {/* Volume Control */}
             <div className="mb-8 flex items-center gap-4">
               <span className="text-[#6B7280] text-sm w-16">Volume</span>
               <input
@@ -183,13 +215,18 @@ export default function Page() {
                 max="1"
                 step="0.01"
                 value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
+                onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 className="flex-1 h-2 bg-[#1E1E2E] rounded-lg appearance-none cursor-pointer accent-[#00E5CC]"
               />
               <span className="text-[#E8ECF0] text-sm w-12 text-right">{Math.round(volume * 100)}%</span>
             </div>
 
-            {/* Play/Stop Button */}
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                {errorMsg}
+              </div>
+            )}
+
             <button
               onClick={isPlaying ? stopNoise : startNoise}
               className={`w-full py-4 rounded-xl text-lg font-semibold transition flex items-center justify-center gap-2 ${
@@ -205,7 +242,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Use Cases */}
       <section className="py-24 lg:py-32 bg-[#0A0A12]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -241,7 +277,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-24 lg:py-32 bg-[#08080F]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -288,7 +323,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-[#050508] border-t border-[#1E1E2E] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">

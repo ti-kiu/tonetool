@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import CookieConsent from "../components/CookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
@@ -13,6 +13,7 @@ export default function Page() {
   const [isSweeping, setIsSweeping] = useState(false);
   const [currentFreq, setCurrentFreq] = useState(20);
   const [progress, setProgress] = useState(0);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
@@ -20,75 +21,97 @@ export default function Page() {
   const sweepRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  const startSweep = useCallback(() => {
-    if (isSweeping) return;
-    
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    audioContextRef.current = ctx;
-    
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
-    
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    osc.start();
-    
-    oscillatorRef.current = osc;
-    gainNodeRef.current = gain;
-    
-    setIsSweeping(true);
-    setCurrentFreq(startFreq);
-    startTimeRef.current = Date.now();
-    
-    const animate = () => {
-      const elapsed = (Date.now() - startTimeRef.current) / 1000;
-      const prog = Math.min(elapsed / duration, 1);
-      
-      // Logarithmic sweep
-      const freq = startFreq * Math.pow(endFreq / startFreq, prog);
-      
-      if (osc) {
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      }
-      
-      setCurrentFreq(Math.round(freq));
-      setProgress(prog * 100);
-      
-      if (prog < 1) {
-        sweepRef.current = requestAnimationFrame(animate);
-      } else {
-        stopSweep();
-      }
-    };
-    
-    sweepRef.current = requestAnimationFrame(animate);
-  }, [startFreq, endFreq, duration, isSweeping]);
-
-  const stopSweep = useCallback(() => {
+  const cleanup = useCallback(() => {
     if (sweepRef.current) {
       cancelAnimationFrame(sweepRef.current);
+      sweepRef.current = null;
     }
-    if (oscillatorRef.current) {
-      oscillatorRef.current.stop();
-      oscillatorRef.current.disconnect();
+    try {
+      if (oscillatorRef.current) {
+        oscillatorRef.current.stop();
+        oscillatorRef.current.disconnect();
+      }
+    } catch (e) {}
+    try {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    } catch (e) {}
+    oscillatorRef.current = null;
+    gainNodeRef.current = null;
+    audioContextRef.current = null;
+  }, []);
+
+  const startSweep = () => {
+    if (isSweeping) return;
+    setErrorMsg(null);
+    
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMsg('Your browser does not support Web Audio API. Please use Chrome, Safari, or Edge.');
+        return;
+      }
+      
+      const ctx = new AC();
+      audioContextRef.current = ctx;
+      
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start();
+      
+      oscillatorRef.current = osc;
+      gainNodeRef.current = gain;
+      
+      setIsSweeping(true);
+      setCurrentFreq(startFreq);
+      startTimeRef.current = Date.now();
+      
+      const animate = () => {
+        const elapsed = (Date.now() - startTimeRef.current) / 1000;
+        const prog = Math.min(elapsed / duration, 1);
+        const freq = startFreq * Math.pow(endFreq / startFreq, prog);
+        
+        try {
+          if (osc && ctx.state !== 'closed') {
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          }
+        } catch (e) {}
+        
+        setCurrentFreq(Math.round(freq));
+        setProgress(prog * 100);
+        
+        if (prog < 1) {
+          sweepRef.current = requestAnimationFrame(animate);
+        } else {
+          cleanup();
+          setIsSweeping(false);
+          setProgress(0);
+          setCurrentFreq(startFreq);
+        }
+      };
+      
+      sweepRef.current = requestAnimationFrame(animate);
+    } catch (err: any) {
+      setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
+      cleanup();
     }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
+  };
+
+  const stopSweep = () => {
+    cleanup();
     setIsSweeping(false);
     setProgress(0);
     setCurrentFreq(startFreq);
-  }, [startFreq]);
-
-  useEffect(() => {
-    return () => stopSweep();
-  }, [stopSweep]);
+  };
 
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
@@ -120,12 +143,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Sweep Tool */}
       <section className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
             
-            {/* Current Frequency Display */}
             <div className="text-center mb-8">
               <div className="text-6xl font-bold text-[#E8ECF0] tabular-nums">
                 {currentFreq.toLocaleString()}
@@ -133,7 +154,6 @@ export default function Page() {
               <div className="text-[#6B7280] text-sm mt-1">Hz</div>
             </div>
 
-            {/* Progress Bar */}
             <div className="mb-8">
               <div className="w-full h-3 bg-[#1E1E2E] rounded-full overflow-hidden">
                 <div 
@@ -148,7 +168,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Controls */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="text-sm text-[#6B7280] mb-2 block">Start Frequency</label>
@@ -189,7 +208,12 @@ export default function Page() {
               />
             </div>
 
-            {/* Play/Stop Button */}
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                {errorMsg}
+              </div>
+            )}
+
             <button
               onClick={isSweeping ? stopSweep : startSweep}
               className={`w-full py-4 rounded-xl text-lg font-semibold transition flex items-center justify-center gap-2 ${
@@ -205,7 +229,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Use Cases */}
       <section className="py-24 lg:py-32 bg-[#0A0A12]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -241,7 +264,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-24 lg:py-32 bg-[#08080F]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -288,7 +310,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-[#050508] border-t border-[#1E1E2E] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">

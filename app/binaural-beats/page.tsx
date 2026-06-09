@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import CookieConsent from "../components/CookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
@@ -22,6 +22,7 @@ export default function Page() {
   const [volume, setVolume] = useState(0.3);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activePreset, setActivePreset] = useState<BeatPreset | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const leftOscRef = useRef<OscillatorNode | null>(null);
@@ -30,76 +31,110 @@ export default function Page() {
   const rightGainRef = useRef<GainNode | null>(null);
   const mergerRef = useRef<ChannelMergerNode | null>(null);
 
-  const startBinaural = useCallback(() => {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    audioContextRef.current = ctx;
-    
-    // Left ear: base frequency
-    const leftOsc = ctx.createOscillator();
-    leftOsc.type = 'sine';
-    leftOsc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
-    
-    // Right ear: base + beat frequency
-    const rightOsc = ctx.createOscillator();
-    rightOsc.type = 'sine';
-    rightOsc.frequency.setValueAtTime(baseFreq + beatFreq, ctx.currentTime);
-    
-    // Gain nodes for volume control
-    const leftGain = ctx.createGain();
-    leftGain.gain.setValueAtTime(volume * 0.5, ctx.currentTime);
-    
-    const rightGain = ctx.createGain();
-    rightGain.gain.setValueAtTime(volume * 0.5, ctx.currentTime);
-    
-    // Channel merger for stereo output
-    const merger = ctx.createChannelMerger(2);
-    
-    leftOsc.connect(leftGain);
-    rightOsc.connect(rightGain);
-    leftGain.connect(merger, 0, 0);
-    rightGain.connect(merger, 0, 1);
-    merger.connect(ctx.destination);
-    
-    leftOsc.start();
-    rightOsc.start();
-    
-    leftOscRef.current = leftOsc;
-    rightOscRef.current = rightOsc;
-    leftGainRef.current = leftGain;
-    rightGainRef.current = rightGain;
-    mergerRef.current = merger;
-    
-    setIsPlaying(true);
-  }, [baseFreq, beatFreq, volume]);
-
-  const stopBinaural = useCallback(() => {
+  const cleanup = useCallback(() => {
     [leftOscRef, rightOscRef].forEach(ref => {
-      if (ref.current) {
-        ref.current.stop();
-        ref.current.disconnect();
-      }
+      try {
+        if (ref.current) {
+          ref.current.stop();
+          ref.current.disconnect();
+        }
+      } catch (e) {}
     });
-    if (mergerRef.current) mergerRef.current.disconnect();
-    if (audioContextRef.current) audioContextRef.current.close();
-    setIsPlaying(false);
+    [leftGainRef, rightGainRef].forEach(ref => {
+      try {
+        if (ref.current) ref.current.disconnect();
+      } catch (e) {}
+    });
+    try {
+      if (mergerRef.current) mergerRef.current.disconnect();
+    } catch (e) {}
+    try {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    } catch (e) {}
+    leftOscRef.current = null;
+    rightOscRef.current = null;
+    leftGainRef.current = null;
+    rightGainRef.current = null;
+    mergerRef.current = null;
+    audioContextRef.current = null;
   }, []);
+
+  const startBinaural = () => {
+    if (isPlaying) return;
+    setErrorMsg(null);
+    
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMsg('Your browser does not support Web Audio API. Please use Chrome, Safari, or Edge.');
+        return;
+      }
+      
+      cleanup();
+      
+      const ctx = new AC();
+      audioContextRef.current = ctx;
+      
+      const leftOsc = ctx.createOscillator();
+      leftOsc.type = 'sine';
+      leftOsc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
+      
+      const rightOsc = ctx.createOscillator();
+      rightOsc.type = 'sine';
+      rightOsc.frequency.setValueAtTime(baseFreq + beatFreq, ctx.currentTime);
+      
+      const leftGain = ctx.createGain();
+      leftGain.gain.setValueAtTime(volume * 0.5, ctx.currentTime);
+      
+      const rightGain = ctx.createGain();
+      rightGain.gain.setValueAtTime(volume * 0.5, ctx.currentTime);
+      
+      const merger = ctx.createChannelMerger(2);
+      
+      leftOsc.connect(leftGain);
+      rightOsc.connect(rightGain);
+      leftGain.connect(merger, 0, 0);
+      rightGain.connect(merger, 0, 1);
+      merger.connect(ctx.destination);
+      
+      leftOsc.start();
+      rightOsc.start();
+      
+      leftOscRef.current = leftOsc;
+      rightOscRef.current = rightOsc;
+      leftGainRef.current = leftGain;
+      rightGainRef.current = rightGain;
+      mergerRef.current = merger;
+      
+      setIsPlaying(true);
+    } catch (err: any) {
+      setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
+      cleanup();
+    }
+  };
+
+  const stopBinaural = () => {
+    cleanup();
+    setIsPlaying(false);
+  };
 
   const applyPreset = (preset: BeatPreset) => {
     setActivePreset(preset);
     setBeatFreq(PRESETS[preset].freq);
   };
 
-  useEffect(() => {
-    if (leftGainRef.current && rightGainRef.current && audioContextRef.current) {
-      const now = audioContextRef.current.currentTime;
-      leftGainRef.current.gain.setValueAtTime(volume * 0.5, now);
-      rightGainRef.current.gain.setValueAtTime(volume * 0.5, now);
+  const handleVolumeChange = (newVol: number) => {
+    setVolume(newVol);
+    if (leftGainRef.current && rightGainRef.current && audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      try {
+        const now = audioContextRef.current.currentTime;
+        leftGainRef.current.gain.setValueAtTime(newVol * 0.5, now);
+        rightGainRef.current.gain.setValueAtTime(newVol * 0.5, now);
+      } catch (e) {}
     }
-  }, [volume]);
-
-  useEffect(() => {
-    return () => stopBinaural();
-  }, [stopBinaural]);
+  };
 
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
@@ -131,12 +166,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Binaural Tool */}
       <section className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
             
-            {/* Presets */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-8">
               {(Object.keys(PRESETS) as BeatPreset[]).map((preset) => (
                 <button
@@ -154,7 +187,6 @@ export default function Page() {
               ))}
             </div>
 
-            {/* Frequency Display */}
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="text-center p-4 bg-[#08080F] rounded-xl border border-[#1E1E2E]">
                 <div className="text-sm text-[#6B7280] mb-1">Left Ear</div>
@@ -168,7 +200,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Beat Frequency */}
             <div className="text-center mb-6">
               <div className="text-sm text-[#6B7280] mb-2">Beat Frequency: {beatFreq} Hz</div>
               <input
@@ -189,7 +220,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Base Frequency */}
             <div className="mb-8">
               <label className="text-sm text-[#6B7280] mb-2 block">Base Frequency: {baseFreq} Hz</label>
               <input
@@ -202,7 +232,6 @@ export default function Page() {
               />
             </div>
 
-            {/* Volume */}
             <div className="mb-8 flex items-center gap-4">
               <span className="text-[#6B7280] text-sm w-16">Volume</span>
               <input
@@ -211,13 +240,18 @@ export default function Page() {
                 max="1"
                 step="0.01"
                 value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
+                onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 className="flex-1 h-2 bg-[#1E1E2E] rounded-lg appearance-none cursor-pointer accent-[#00E5CC]"
               />
               <span className="text-[#E8ECF0] text-sm w-12 text-right">{Math.round(volume * 100)}%</span>
             </div>
 
-            {/* Play/Stop */}
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                {errorMsg}
+              </div>
+            )}
+
             <button
               onClick={isPlaying ? stopBinaural : startBinaural}
               className={`w-full py-4 rounded-xl text-lg font-semibold transition flex items-center justify-center gap-2 ${
@@ -235,7 +269,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Use Cases */}
       <section className="py-24 lg:py-32 bg-[#0A0A12]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -271,7 +304,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="py-24 lg:py-32 bg-[#08080F]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -318,7 +350,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-[#050508] border-t border-[#1E1E2E] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
