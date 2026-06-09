@@ -2,8 +2,9 @@
 
 import { useState, useRef, useCallback } from 'react';
 import CookieConsent from "../components/CookieConsent";
+import { FAQList } from "../components/FAQ";
 import Image from "next/image";
-import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
+import { Menu, X, Play, Pause } from "lucide-react";
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -272,43 +273,15 @@ export default function Page() {
             <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">FAQ</p>
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
-          <div className="space-y-3">
-            <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-              <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">How fast should I sweep?</span>
-                <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">For detailed testing, sweep slowly — about 1 second per 100Hz. For quick checks, faster sweeps work fine. Adjust the slider speed to match your needs.</div>
-            </details>
-            <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-              <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">What's the best range to test speakers?</span>
-                <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">Full range: 20Hz-20kHz. Focus on 100Hz-200Hz for bass quality, 1kHz-4kHz for vocal clarity, and 10kHz+ for treble detail.</div>
-            </details>
-            <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-              <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Can I sweep backwards (high to low)?</span>
-                <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">Yes. Set the starting frequency high and drag the slider down. Some issues are easier to notice when sweeping down.</div>
-            </details>
-            <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-              <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Why do some frequencies sound louder than others?</span>
-                <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">Human hearing is not flat — we're most sensitive to 2kHz-5kHz. Plus, your speakers/headphones and room acoustics affect perceived volume.</div>
-            </details>
-            <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-              <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Can I save a sweep recording?</span>
-                <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">Use your device's screen recording or audio recording software while running the sweep. The tool itself doesn't record audio.</div>
-            </details>
-          </div>
+          <FAQList
+            items={[
+              { question: "How fast should I sweep?", answer: "For detailed testing, sweep slowly — about 1 second per 100Hz. For quick checks, faster sweeps work fine. Adjust the slider speed to match your needs." },
+              { question: "What's the best range to test speakers?", answer: "Full range: 20Hz-20kHz. Focus on 100Hz-200Hz for bass quality, 1kHz-4kHz for vocal clarity, and 10kHz+ for treble detail." },
+              { question: "Can I sweep backwards (high to low)?", answer: "Yes. Set the starting frequency high and drag the slider down. Some issues are easier to notice when sweeping down." },
+              { question: "Why do some frequencies sound louder than others?", answer: "Human hearing is not flat — we're most sensitive to 2kHz-5kHz. Plus, your speakers/headphones and room acoustics affect perceived volume." },
+              { question: "Can I save a sweep recording?", answer: "Use your device's screen recording or audio recording software while running the sweep. The tool itself doesn't record audio." },
+            ]}
+          />
         </div>
       </section>
 
