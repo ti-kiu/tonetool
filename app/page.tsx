@@ -391,9 +391,9 @@ export default function Home() {
               <ul className="space-y-2">
                 {["Features", "FAQ", "Use Cases", "Blog"].map((link) => (
                   <li key={link}>
-                    <Link href={link === 'Blog' ? '/blog' : `#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+                    <a href={link === 'Blog' ? '/blog' : `#${link.toLowerCase().replace(/\s+/g, "-")}`} className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
                       {link}
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>
