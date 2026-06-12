@@ -66,24 +66,26 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
         {children}
-        {/* GA4 with consent mode - loaded at end of body to avoid hydration issues */}
+        {/* GA4 - loaded at end of body to avoid hydration issues */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-L7CZQ8T37C', {
-                'anonymize_ip': true,
-                'allow_google_signals': false,
-                'restricted_data_processing': true
-              });
-              gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied'
-              });
+              try {
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-L7CZQ8T37C', {
+                  'anonymize_ip': true,
+                  'allow_google_signals': false,
+                  'restricted_data_processing': true
+                });
+                gtag('consent', 'default', {
+                  'analytics_storage': 'denied',
+                  'ad_storage': 'denied',
+                  'ad_user_data': 'denied',
+                  'ad_personalization': 'denied'
+                });
+              } catch(e) {}
             `,
           }}
         />
@@ -91,11 +93,19 @@ export default function RootLayout({
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-L7CZQ8T37C"
         />
-        {/* AdSense */}
+        {/* Global error handler */}
         <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          crossOrigin="anonymous"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.onerror = function(msg, url, line, col, error) {
+                console.error('[GlobalError]', msg, url, line, col);
+                return false;
+              };
+              window.addEventListener('unhandledrejection', function(e) {
+                console.error('[UnhandledPromise]', e.reason);
+              });
+            `,
+          }}
         />
       </body>
     </html>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import { FAQList } from "../components/FAQ";
 import Image from "next/image";
@@ -15,127 +15,154 @@ export default function Page() {
   const [currentFreq, setCurrentFreq] = useState(20);
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const gainNodeRef = useRef<GainNode | null>(null);
-  const sweepRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
-  const isSweepingRef = useRef<boolean>(false);
 
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const oscRef = useRef<OscillatorNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const isPlayingRef = useRef(false);
+  const startRef = useRef(0);
+
+  // Cleanup function — safe to call multiple times
   const cleanup = useCallback(() => {
-    if (sweepRef.current) {
-      cancelAnimationFrame(sweepRef.current);
-      sweepRef.current = null;
+    isPlayingRef.current = false;
+
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
     }
+
     try {
-      if (oscillatorRef.current) {
-        oscillatorRef.current.stop();
-        oscillatorRef.current.disconnect();
+      if (oscRef.current) {
+        oscRef.current.onended = null;
+        oscRef.current.stop();
+        oscRef.current.disconnect();
       }
-    } catch (e) {}
+    } catch (_) { /* already stopped */ }
+
     try {
-      if (gainNodeRef.current) {
-        gainNodeRef.current.disconnect();
+      if (gainRef.current) {
+        gainRef.current.disconnect();
       }
-    } catch (e) {}
-    oscillatorRef.current = null;
-    gainNodeRef.current = null;
-    // DON'T close audioContext — reuse it like homepage
+    } catch (_) {}
+
+    oscRef.current = null;
+    gainRef.current = null;
   }, []);
 
-  const startSweep = useCallback(() => {
-    if (isSweepingRef.current) return;
+  // Unmount cleanup
+  useEffect(() => {
+    return () => {
+      cleanup();
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
+    };
+  }, [cleanup]);
+
+  const startSweep = useCallback(async () => {
+    if (isPlayingRef.current) return;
     setErrorMsg(null);
-    
+
     try {
+      // 1. Get AudioContext constructor
       const AC = window.AudioContext || (window as any).webkitAudioContext;
       if (!AC) {
         setErrorMsg('Your browser does not support Web Audio API. Please use Chrome, Safari, or Edge.');
         return;
       }
-      
-      // Reuse existing context or create new one
-      if (!audioContextRef.current) {
-        audioContextRef.current = new AC();
+
+      // 2. Create or reuse AudioContext
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new AC();
       }
-      const ctx = audioContextRef.current;
-      
-      // Resume if suspended
+      const ctx = audioCtxRef.current;
+
+      // 3. Properly await resume
       if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
+        await ctx.resume();
       }
-      
-      // Stop any existing oscillator
-      if (oscillatorRef.current) {
-        try {
-          oscillatorRef.current.stop();
-          oscillatorRef.current.disconnect();
-        } catch (e) {}
+
+      // 4. Verify context is running
+      if (ctx.state !== 'running') {
+        setErrorMsg('Audio could not start. Please click the page first, then try again.');
+        return;
       }
-      if (gainNodeRef.current) {
-        try {
-          gainNodeRef.current.disconnect();
-        } catch (e) {}
-      }
-      
+
+      // 5. Clean up any existing oscillator
+      cleanup();
+
+      // 6. Create oscillator and gain
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
+
       osc.type = 'sine';
       osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
       gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      
+
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
-      osc.start();
-      
-      oscillatorRef.current = osc;
-      gainNodeRef.current = gain;
-      
-      isSweepingRef.current = true;
-      setIsSweeping(true);
-      setCurrentFreq(startFreq);
-      startTimeRef.current = Date.now();
-      
-      const animate = () => {
-        const elapsed = (Date.now() - startTimeRef.current) / 1000;
-        const prog = Math.min(elapsed / duration, 1);
-        const freq = startFreq * Math.pow(endFreq / startFreq, prog);
-        
-        try {
-          const currentOsc = oscillatorRef.current;
-          const currentCtx = audioContextRef.current;
-          if (currentOsc && currentCtx && currentCtx.state === 'running') {
-            currentOsc.frequency.setValueAtTime(freq, currentCtx.currentTime);
-          }
-        } catch (e) {}
-        
-        setCurrentFreq(Math.round(freq));
-        setProgress(prog * 100);
-        
-        if (prog < 1 && isSweepingRef.current) {
-          sweepRef.current = requestAnimationFrame(animate);
-        } else if (prog >= 1) {
+
+      // 7. Handle unexpected stop
+      osc.onended = () => {
+        if (isPlayingRef.current) {
           cleanup();
-          isSweepingRef.current = false;
           setIsSweeping(false);
           setProgress(0);
           setCurrentFreq(startFreq);
         }
       };
-      
-      sweepRef.current = requestAnimationFrame(animate);
+
+      osc.start();
+
+      oscRef.current = osc;
+      gainRef.current = gain;
+      isPlayingRef.current = true;
+      setIsSweeping(true);
+      setCurrentFreq(startFreq);
+      setProgress(0);
+      startRef.current = performance.now();
+
+      // 8. Animation loop using ref for isPlaying (not state)
+      const animate = (now: number) => {
+        if (!isPlayingRef.current) return;
+
+        const elapsed = (now - startRef.current) / 1000;
+        const prog = Math.min(elapsed / duration, 1);
+        const freq = startFreq * Math.pow(endFreq / startFreq, prog);
+
+        // Update oscillator frequency safely
+        try {
+          if (oscRef.current && audioCtxRef.current && audioCtxRef.current.state === 'running') {
+            oscRef.current.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
+          }
+        } catch (_) {}
+
+        setCurrentFreq(Math.round(freq));
+        setProgress(prog * 100);
+
+        if (prog >= 1) {
+          // Sweep complete
+          cleanup();
+          setIsSweeping(false);
+          setProgress(0);
+          setCurrentFreq(startFreq);
+          return;
+        }
+
+        animFrameRef.current = requestAnimationFrame(animate);
+      };
+
+      animFrameRef.current = requestAnimationFrame(animate);
     } catch (err: any) {
       setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
       cleanup();
+      setIsSweeping(false);
     }
   }, [startFreq, endFreq, duration, cleanup]);
 
   const stopSweep = useCallback(() => {
     cleanup();
-    isSweepingRef.current = false;
     setIsSweeping(false);
     setProgress(0);
     setCurrentFreq(startFreq);
@@ -174,7 +201,7 @@ export default function Page() {
       <section className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
-            
+
             <div className="text-center mb-8">
               <div className="text-6xl font-bold text-[#E8ECF0] tabular-nums">
                 {currentFreq.toLocaleString()}
@@ -184,7 +211,7 @@ export default function Page() {
 
             <div className="mb-8">
               <div className="w-full h-3 bg-[#1E1E2E] rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-[#00E5CC] to-[#00E5CC]/50 rounded-full transition-all duration-100"
                   style={{ width: `${progress}%` }}
                 />
@@ -268,7 +295,7 @@ export default function Page() {
               <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Speaker Test</span>
               <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Test Full Speaker Response</h3>
               <div className="space-y-3 text-[#6B7280]">
-                <p><span className="text-[#6B7280]">Before:</span> Your speakers sound uneven, but you don't know which frequencies are problematic.</p>
+                <p><span className="text-[#6B7280]">Before:</span> Your speakers sound uneven, but you don&apos;t know which frequencies are problematic.</p>
                 <p><span className="text-[#E8ECF0]">After:</span> Run a slow sweep from 20Hz to 20kHz. Hear exactly where the response drops or peaks.</p>
               </div>
             </div>
@@ -276,7 +303,7 @@ export default function Page() {
               <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Resonance</span>
               <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Find Room Resonances</h3>
               <div className="space-y-3 text-[#6B7280]">
-                <p><span className="text-[#6B7280]">Before:</span> Your room has weird booming or dead spots, but you can't identify the problem frequencies.</p>
+                <p><span className="text-[#6B7280]">Before:</span> Your room has weird booming or dead spots, but you can&apos;t identify the problem frequencies.</p>
                 <p><span className="text-[#E8ECF0]">After:</span> Sweep through low frequencies. Note where the volume jumps — those are your room resonances.</p>
               </div>
             </div>
@@ -285,7 +312,7 @@ export default function Page() {
               <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Map Your Hearing Range</h3>
               <div className="space-y-3 text-[#6B7280]">
                 <p><span className="text-[#6B7280]">Before:</span> You wonder what your actual hearing range is, compared to the theoretical 20Hz-20kHz.</p>
-                <p><span className="text-[#E8ECF0]">After:</span> Sweep slowly. Note where you stop hearing. That's your personal hearing range.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Sweep slowly. Note where you stop hearing. That&apos;s your personal hearing range.</p>
               </div>
             </div>
           </div>
@@ -342,7 +369,7 @@ export default function Page() {
             </div>
           </div>
           <div className="border-t border-[#1E1E2E] pt-8">
-            <p className="font-['JetBrains_Mono',monospace] text-xs text-[#4B5563] text-center">© 2026 Tone Generator. All rights reserved.</p>
+            <p className="font-['JetBrains_Mono',monospace] text-xs text-[#4B5563] text-center">&copy; 2026 Tone Generator. All rights reserved.</p>
           </div>
         </div>
       </footer>
