@@ -40,6 +40,7 @@ export const metadata: Metadata = {
   other: {
     "msapplication-TileColor": "#08080F",
     "theme-color": "#08080F",
+    google: "notranslate",
   },
 };
 
@@ -49,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth notranslate" suppressHydrationWarning translate="no">
       <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]" suppressHydrationWarning>
         {children}
       </body>
