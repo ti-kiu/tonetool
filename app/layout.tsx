@@ -60,6 +60,9 @@ export default function RootLayout({
         <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/assets/logo.png" />
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </head>
       <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
         {children}
