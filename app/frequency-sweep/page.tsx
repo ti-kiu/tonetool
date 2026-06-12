@@ -21,6 +21,7 @@ export default function Page() {
   const gainNodeRef = useRef<GainNode | null>(null);
   const sweepRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
+  const isSweepingRef = useRef<boolean>(false);
 
   const cleanup = useCallback(() => {
     if (sweepRef.current) {
@@ -43,8 +44,8 @@ export default function Page() {
     // DON'T close audioContext — reuse it like homepage
   }, []);
 
-  const startSweep = () => {
-    if (isSweeping) return;
+  const startSweep = useCallback(() => {
+    if (isSweepingRef.current) return;
     setErrorMsg(null);
     
     try {
@@ -93,6 +94,7 @@ export default function Page() {
       oscillatorRef.current = osc;
       gainNodeRef.current = gain;
       
+      isSweepingRef.current = true;
       setIsSweeping(true);
       setCurrentFreq(startFreq);
       startTimeRef.current = Date.now();
@@ -113,10 +115,11 @@ export default function Page() {
         setCurrentFreq(Math.round(freq));
         setProgress(prog * 100);
         
-        if (prog < 1 && isSweeping) {
+        if (prog < 1 && isSweepingRef.current) {
           sweepRef.current = requestAnimationFrame(animate);
         } else if (prog >= 1) {
           cleanup();
+          isSweepingRef.current = false;
           setIsSweeping(false);
           setProgress(0);
           setCurrentFreq(startFreq);
@@ -128,14 +131,15 @@ export default function Page() {
       setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
       cleanup();
     }
-  };
+  }, [startFreq, endFreq, duration, cleanup]);
 
-  const stopSweep = () => {
+  const stopSweep = useCallback(() => {
     cleanup();
+    isSweepingRef.current = false;
     setIsSweeping(false);
     setProgress(0);
     setCurrentFreq(startFreq);
-  };
+  }, [cleanup, startFreq]);
 
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
