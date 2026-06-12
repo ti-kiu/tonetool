@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import AudioEngine from "./components/AudioEngine";
-import CookieConsent from "./components/CookieConsent";
+import DynamicCookieConsent from "./components/DynamicCookieConsent";
 import Image from "next/image";
 import { 
   Waves, 
@@ -462,7 +462,7 @@ export default function Home() {
       </footer>
 
       {/* Cookie Consent */}
-      <CookieConsent />
+      <DynamicCookieConsent />
     </main>
   );
 }

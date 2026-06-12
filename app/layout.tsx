@@ -58,15 +58,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" 
           rel="stylesheet" 
         />
-        <meta name="cache-control" content="no-cache, no-store, must-revalidate" />
-        <meta name="pragma" content="no-cache" />
-        <meta name="expires" content="0" />
         {/* Favicon */}
         <link rel="icon" href="/assets/logo.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/assets/logo.png" />
         {/* Sitemap */}
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-        {/* GA4 with consent mode */}
+      </head>
+      <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+        {children}
+        {/* GA4 with consent mode - loaded at end of body to avoid hydration issues */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -78,7 +78,6 @@ export default function RootLayout({
                 'allow_google_signals': false,
                 'restricted_data_processing': true
               });
-              // Default deny all
               gtag('consent', 'default', {
                 'analytics_storage': 'denied',
                 'ad_storage': 'denied',
@@ -98,9 +97,6 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
           crossOrigin="anonymous"
         />
-      </head>
-      <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
-        {children}
       </body>
     </html>
   );

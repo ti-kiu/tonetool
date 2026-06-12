@@ -1,10 +1,8 @@
-
-
 "use client";
 
 import { useState } from 'react';
 import AudioEngine from "../components/AudioEngine";
-import CookieConsent from "../components/CookieConsent";
+import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X } from "lucide-react";
 
@@ -236,7 +234,7 @@ export default function Page() {
         </div>
       </footer>
 
-      <CookieConsent />
+      <DynamicCookieConsent />
     </main>
   );
 }
