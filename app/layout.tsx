@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   creator: "Tone Generator",
   publisher: "Tone Generator",
   robots: "index, follow",
+  icons: {
+    icon: "/favicon.ico",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
