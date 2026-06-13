@@ -51,6 +51,41 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth notranslate" suppressHydrationWarning translate="no">
+      <head>
+        {/* Schema.org Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Tone Generator",
+              "url": "https://tonetool.org",
+              "description": "Free online tone generator. Generate sine, square, triangle, and sawtooth waves from 1Hz to 20kHz. Perfect for testing headphones, speakers, and hearing.",
+              "applicationCategory": "MultimediaApplication",
+              "operatingSystem": "Web Browser",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "featureList": [
+                "Generate frequencies from 1Hz to 20kHz",
+                "4 waveform types: sine, square, triangle, sawtooth",
+                "Frequency sweep testing",
+                "WAV file download",
+                "Mobile-friendly design",
+                "No signup required"
+              ],
+              "screenshot": "https://tonetool.org/assets/og-image.png",
+              "softwareHelp": {
+                "@type": "CreativeWork",
+                "url": "https://tonetool.org/#faq"
+              }
+            })
+          }}
+        />
+      </head>
       <body className="antialiased bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]" suppressHydrationWarning>
         {children}
       </body>
