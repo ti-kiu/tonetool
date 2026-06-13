@@ -183,21 +183,30 @@ export default function InstrumentTunerPage() {
     setDetectedFrequency(null);
   }, []);
 
-  const toggleRefTone = useCallback(() => {
+  const toggleRefTone = useCallback(async () => {
     if (isPlayingRefTone) {
       // Stop reference tone
       if (refOscillatorRef.current) {
-        refOscillatorRef.current.stop();
+        try { refOscillatorRef.current.stop(); } catch (_) {}
         refOscillatorRef.current = null;
       }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
+        audioContextRef.current.close().catch(() => {});
         audioContextRef.current = null;
       }
       setIsPlayingRefTone(false);
     } else {
       // Start reference tone
-      const ctx = new AudioContext();
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) return;
+      
+      const ctx = new AC();
+      
+      // Resume if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+      
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.frequency.value = a4Ref;
