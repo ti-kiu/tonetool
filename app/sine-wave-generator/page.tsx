@@ -25,6 +25,10 @@ export default function Page() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    document.title = 'Sine Wave Generator - Pure Tone Generator | Tone Generator';
+  }, []);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscRef = useRef<OscillatorNode | null>(null);
   const gainRef = useRef<GainNode | null>(null);

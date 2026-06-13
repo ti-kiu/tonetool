@@ -12,6 +12,10 @@ const SINGLE_FREQ_PRESETS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [duration, setDuration] = useState(5);
+
+  useEffect(() => {
+    document.title = 'Subwoofer Test - Bass Frequency Sweep | Tone Generator';
+  }, []);
   const [isSweeping, setIsSweeping] = useState(false);
   const [currentFreq, setCurrentFreq] = useState(20);
   const [progress, setProgress] = useState(0);

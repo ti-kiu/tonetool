@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
@@ -23,6 +23,10 @@ export default function Page() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activePreset, setActivePreset] = useState<BeatPreset | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Binaural Beats - Relaxation & Meditation | Tone Generator';
+  }, []);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const leftOscRef = useRef<OscillatorNode | null>(null);

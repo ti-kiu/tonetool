@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import Image from "next/image";
 import { ChevronDown, Menu, X, Play, Pause } from "lucide-react";
@@ -13,6 +13,10 @@ export default function Page() {
   const [volume, setVolume] = useState(0.3);
   const [isPlaying, setIsPlaying] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'White Noise Generator - Sleep & Focus | Tone Generator';
+  }, []);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);

@@ -16,6 +16,10 @@ export default function Page() {
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    document.title = 'Frequency Sweep - Test Speakers & Hearing | Tone Generator';
+  }, []);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscRef = useRef<OscillatorNode | null>(null);
   const gainRef = useRef<GainNode | null>(null);

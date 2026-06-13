@@ -61,6 +61,10 @@ export default function Page() {
   const [history, setHistory] = useState<{ frequency: number; timestamp: string }[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
 
+  useEffect(() => {
+    document.title = 'Tinnitus Frequency Matcher - Find Your Tone | Tone Generator';
+  }, []);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);

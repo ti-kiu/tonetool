@@ -41,6 +41,11 @@ export default function HearingTestPage() {
   const [testState, setTestState] = useState<TestState>('idle');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<Record<number, boolean | null>>({});
+
+  useEffect(() => {
+    document.title = 'Hearing Test - Check Your Frequency Range | Tone Generator';
+  }, []);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 

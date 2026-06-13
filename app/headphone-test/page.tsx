@@ -38,6 +38,10 @@ export default function Page() {
   const [leftFreq, setLeftFreq] = useState(440);
   const [rightFreq, setRightFreq] = useState(880);
 
+  useEffect(() => {
+    document.title = 'Headphone Test - Check Left/Right Balance | Tone Generator';
+  }, []);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscLeftRef = useRef<OscillatorNode | null>(null);
   const oscRightRef = useRef<OscillatorNode | null>(null);

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AudioEngine from "../components/AudioEngine";
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import Image from "next/image";
@@ -11,6 +11,10 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.title = '440Hz Tuning Tone - Standard A4 Reference | Tone Generator';
+  }, []);
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
