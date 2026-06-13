@@ -64,6 +64,8 @@ export default function RootLayout({
             `
           }}
         />
+        {/* Microsoft Bing Verification */}
+        <meta name="msvalidate.01" content="8D5AE51845CFE08F58F54A68CFF76D57" />
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
