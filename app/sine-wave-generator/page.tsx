@@ -219,6 +219,27 @@ export default function Page() {
         </div>
       </section>
 
+      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-6 mb-8">
+        <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-semibold text-[#E8ECF0] mb-4">
+          <Waves className="w-5 h-5 inline mr-2 text-[#00E5CC]" />
+          How to Generate Sine Waves
+        </h3>
+        <div className="grid md:grid-cols-3 gap-4 text-sm text-[#6B7280]">
+          <div className="flex items-start gap-3">
+            <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">1</span>
+            <p>Choose a frequency using the slider, number input, or quick presets</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">2</span>
+            <p>Adjust the volume to a comfortable level</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">3</span>
+            <p>Click 'Play Sine Wave' — use Space bar to toggle playback</p>
+          </div>
+        </div>
+      </div>
+
       <section className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">

@@ -81,6 +81,32 @@ export default function Page() {
         </div>
       </section>
 
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-6">
+          <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-semibold text-[#E8ECF0] mb-4">
+            How to Use This Tool
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-[#6B7280]">
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">1</span>
+              <p>Click 'Play' to start the 440Hz reference tone</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">2</span>
+              <p>Adjust volume with the slider (start at 50%)</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">3</span>
+              <p>Tune your instrument's A string to match this pitch</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">4</span>
+              <p>Use Space bar to toggle playback on/off</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <section id="audio-tool" className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <AudioEngine defaultFrequency={440} lockFrequency={true} />
