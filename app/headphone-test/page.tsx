@@ -7,6 +7,16 @@ import { ChevronDown, Menu, X, Headphones, Volume2, VolumeX, ArrowLeftRight } fr
 
 type TestMode = 'left-right' | 'frequency-balance' | 'stereo-separation';
 
+const PRESETS = [
+  { freq: 100, label: '100 Hz', desc: 'Bass' },
+  { freq: 200, label: '200 Hz', desc: 'Low Mid' },
+  { freq: 440, label: '440 Hz', desc: 'Concert A' },
+  { freq: 1000, label: '1 kHz', desc: 'Mid Range' },
+  { freq: 2000, label: '2 kHz', desc: 'Upper Mid' },
+  { freq: 4000, label: '4 kHz', desc: 'Presence' },
+  { freq: 8000, label: '8 kHz', desc: 'Brilliance' },
+];
+
 interface TestConfig {
   mode: TestMode;
   label: string;
@@ -354,34 +364,58 @@ export default function Page() {
           <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
             {/* Frequency controls for frequency-balance mode */}
             {activeMode === 'frequency-balance' && (
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div>
-                  <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
-                    LEFT CHANNEL — {leftFreq}Hz
-                  </label>
-                  <input
-                    type="range"
-                    min="20"
-                    max="2000"
-                    value={leftFreq}
-                    onChange={(e) => setLeftFreq(Number(e.target.value))}
-                    disabled={!isPlaying}
-                    className="w-full accent-[#00E5CC]"
-                  />
+              <div className="mb-8">
+                {/* Quick Presets */}
+                <div className="mb-6">
+                  <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mb-3">QUICK PRESETS</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESETS.map((p) => (
+                      <button
+                        key={p.freq}
+                        onClick={() => { setLeftFreq(p.freq); setRightFreq(p.freq * 2); }}
+                        disabled={!isPlaying}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-50 ${
+                          leftFreq === p.freq
+                            ? 'bg-[#00E5CC] text-[#08080F]'
+                            : 'bg-[#08080F] text-[#6B7280] hover:bg-[#1E1E2E] border border-[#1E1E2E]'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
-                    RIGHT CHANNEL — {rightFreq}Hz
-                  </label>
-                  <input
-                    type="range"
-                    min="20"
-                    max="2000"
-                    value={rightFreq}
-                    onChange={(e) => setRightFreq(Number(e.target.value))}
-                    disabled={!isPlaying}
-                    className="w-full accent-[#00E5CC]"
-                  />
+
+                {/* Frequency Sliders */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
+                      LEFT CHANNEL — {leftFreq}Hz
+                    </label>
+                    <input
+                      type="range"
+                      min="20"
+                      max="2000"
+                      value={leftFreq}
+                      onChange={(e) => setLeftFreq(Number(e.target.value))}
+                      disabled={!isPlaying}
+                      className="w-full accent-[#00E5CC]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
+                      RIGHT CHANNEL — {rightFreq}Hz
+                    </label>
+                    <input
+                      type="range"
+                      min="20"
+                      max="2000"
+                      value={rightFreq}
+                      onChange={(e) => setRightFreq(Number(e.target.value))}
+                      disabled={!isPlaying}
+                      className="w-full accent-[#00E5CC]"
+                    />
+                  </div>
                 </div>
               </div>
             )}
