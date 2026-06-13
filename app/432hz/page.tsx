@@ -83,7 +83,7 @@ export default function Page() {
 
       <section id="audio-tool" className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AudioEngine />
+          <AudioEngine defaultFrequency={432} lockFrequency={true} />
         </div>
       </section>
 

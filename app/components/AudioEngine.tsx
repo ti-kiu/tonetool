@@ -5,17 +5,37 @@ import VolumeWarning from './VolumeWarning';
 
 type Waveform = 'sine' | 'square' | 'triangle' | 'sawtooth';
 
-export default function AudioEngine() {
-  // Read initial values from URL
+interface AudioEngineProps {
+  defaultFrequency?: number;
+  defaultWaveform?: Waveform;
+  lockFrequency?: boolean;
+  lockWaveform?: boolean;
+  minFrequency?: number;
+  maxFrequency?: number;
+}
+
+export default function AudioEngine({
+  defaultFrequency = 440,
+  defaultWaveform = 'sine',
+  lockFrequency = false,
+  lockWaveform = false,
+  minFrequency = 1,
+  maxFrequency = 20000,
+}: AudioEngineProps = {}) {
+  // Read initial values from URL (only if not locked)
   const getInitialState = () => {
-    if (typeof window === 'undefined') return { freq: 440, vol: 0.5, wave: 'sine' as Waveform };
+    if (typeof window === 'undefined') return { freq: defaultFrequency, vol: 0.5, wave: defaultWaveform };
     const params = new URLSearchParams(window.location.search);
     return {
-      freq: Math.max(1, Math.min(20000, Number(params.get('f')) || 440)),
+      freq: lockFrequency
+        ? defaultFrequency
+        : Math.max(minFrequency, Math.min(maxFrequency, Number(params.get('f')) || defaultFrequency)),
       vol: Math.max(0, Math.min(1, Number(params.get('v')) || 0.5)),
-      wave: (['sine', 'square', 'triangle', 'sawtooth'].includes(params.get('w') || '')
-        ? params.get('w')
-        : 'sine') as Waveform,
+      wave: lockWaveform
+        ? defaultWaveform
+        : (['sine', 'square', 'triangle', 'sawtooth'].includes(params.get('w') || '')
+          ? params.get('w')
+          : defaultWaveform) as Waveform,
     };
   };
 
@@ -334,53 +354,58 @@ export default function AudioEngine() {
       </div>
 
       {/* Frequency Slider */}
-      <div className="mb-6">
-        <input
-          type="range"
-          min="1"
-          max="20000"
-          value={frequency}
-          onChange={(e) => setFrequency(Number(e.target.value))}
-          className="w-full h-2 bg-[#1E1E2E] rounded-lg appearance-none cursor-pointer accent-[#00E5CC]"
-        />
-        <div className="flex justify-between text-xs text-[#6B7280] mt-1">
-          <span>1 Hz</span>
-          <span>10 kHz</span>
-          <span>20 kHz</span>
+      {!lockFrequency && (
+        <div className="mb-6">
+          <input
+            type="range"
+            min={minFrequency}
+            max={maxFrequency}
+            value={frequency}
+            onChange={(e) => setFrequency(Number(e.target.value))}
+            className="w-full h-2 bg-[#1E1E2E] rounded-lg appearance-none cursor-pointer accent-[#00E5CC]"
+          />
+          <div className="flex justify-between text-xs text-[#6B7280] mt-1">
+            <span>{minFrequency} Hz</span>
+            <span>{maxFrequency >= 1000 ? `${maxFrequency/1000} kHz` : `${maxFrequency} Hz`}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Frequency Input */}
-      <div className="mb-6 flex justify-center">
-        <div className="flex items-center gap-2 bg-[#0F0F1A] border border-[#1E1E2E] rounded-lg px-4 py-2">
-          <input
-            type="number"
-            min="1"
-            max="20000"
-            value={frequency}
-            onChange={(e) => setFrequency(Math.max(1, Math.min(20000, Number(e.target.value))))}
-            className="bg-transparent text-[#E8ECF0] text-center w-24 outline-none"
-          />
-          <span className="text-[#6B7280] text-sm">Hz</span>
+      {!lockFrequency && (
+        <div className="mb-6 flex justify-center">
+          <div className="flex items-center gap-2 bg-[#0F0F1A] border border-[#1E1E2E] rounded-lg px-4 py-2">
+            <input
+              type="number"
+              min={minFrequency}
+              max={maxFrequency}
+              value={frequency}
+              onChange={(e) => setFrequency(Math.max(minFrequency, Math.min(maxFrequency, Number(e.target.value))))}
+              className="bg-transparent text-[#E8ECF0] text-center w-24 outline-none"
+            />
+            <span className="text-[#6B7280] text-sm">Hz</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Waveform Buttons */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
-        {(['sine', 'square', 'triangle', 'sawtooth'] as Waveform[]).map((w) => (
-          <button
-            key={w}
-            onClick={() => setWaveform(w)}
-            className={`py-2 px-4 rounded-lg text-sm font-medium transition ${
-              waveform === w
-                ? 'bg-[#00E5CC] text-[#08080F]'
-                : 'bg-[#0F0F1A] text-[#6B7280] hover:bg-[#1E1E2E]'
-            }`}
-          >
-            {w.charAt(0).toUpperCase() + w.slice(1)}
-          </button>
-        ))}
-      </div>
+      {!lockWaveform && (
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {(['sine', 'square', 'triangle', 'sawtooth'] as Waveform[]).map((w) => (
+            <button
+              key={w}
+              onClick={() => setWaveform(w)}
+              className={`py-2 px-4 rounded-lg text-sm font-medium transition ${
+                waveform === w
+                  ? 'bg-[#00E5CC] text-[#08080F]'
+                  : 'bg-[#0F0F1A] text-[#6B7280] hover:bg-[#1E1E2E]'
+              }`}
+            >
+              {w.charAt(0).toUpperCase() + w.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Volume Control */}
       <div className="mb-6 flex items-center gap-4">
