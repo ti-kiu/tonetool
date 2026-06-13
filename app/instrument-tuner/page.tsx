@@ -143,7 +143,19 @@ export default function InstrumentTunerPage() {
       });
 
       streamRef.current = stream;
-      const audioContext = new AudioContext();
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMessage('Web Audio API not supported');
+        setTunerState('error');
+        return;
+      }
+      const audioContext = new AC();
+      
+      // Resume if suspended (browser autoplay policy)
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
       audioContextRef.current = audioContext;
 
       const source = audioContext.createMediaStreamSource(stream);
