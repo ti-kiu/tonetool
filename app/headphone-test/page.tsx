@@ -1,17 +1,233 @@
+'use client';
 
+import { useState, useRef, useCallback, useEffect } from 'react';
+import DynamicCookieConsent from '../components/DynamicCookieConsent';
+import Image from 'next/image';
+import { ChevronDown, Menu, X, Headphones, Volume2, VolumeX, ArrowLeftRight } from 'lucide-react';
 
-"use client";
+type TestMode = 'left-right' | 'frequency-balance' | 'stereo-separation';
 
-import { useState } from 'react';
-import AudioEngine from "../components/AudioEngine";
-import DynamicCookieConsent from "../components/DynamicCookieConsent";
-import Image from "next/image";
-import { ChevronDown, Menu, X } from "lucide-react";
+interface TestConfig {
+  mode: TestMode;
+  label: string;
+  description: string;
+}
 
+const testModes: TestConfig[] = [
+  { mode: 'left-right', label: 'Left/Right Channel', description: 'Hear the same tone alternate between ears' },
+  { mode: 'frequency-balance', label: 'Frequency Balance', description: 'Different frequencies in each ear' },
+  { mode: 'stereo-separation', label: 'Stereo Separation', description: 'Low tone left, high tone right' },
+];
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const [activeMode, setActiveMode] = useState<TestMode>('left-right');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [leftLevel, setLeftLevel] = useState(0);
+  const [rightLevel, setRightLevel] = useState(0);
+  const [leftFreq, setLeftFreq] = useState(440);
+  const [rightFreq, setRightFreq] = useState(880);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const oscLeftRef = useRef<OscillatorNode | null>(null);
+  const oscRightRef = useRef<OscillatorNode | null>(null);
+  const analyserLeftRef = useRef<AnalyserNode | null>(null);
+  const analyserRightRef = useRef<AnalyserNode | null>(null);
+  const gainLeftRef = useRef<GainNode | null>(null);
+  const gainRightRef = useRef<GainNode | null>(null);
+  const animFrameRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cleanup = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+    }
+    try {
+      oscLeftRef.current?.stop();
+    } catch {}
+    try {
+      oscRightRef.current?.stop();
+    } catch {}
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    oscLeftRef.current = null;
+    oscRightRef.current = null;
+    analyserLeftRef.current = null;
+    analyserRightRef.current = null;
+    gainLeftRef.current = null;
+    gainRightRef.current = null;
+    setLeftLevel(0);
+    setRightLevel(0);
+  }, []);
+
+  useEffect(() => {
+    return () => cleanup();
+  }, [cleanup]);
+
+  const updateLevels = useCallback(() => {
+    if (!analyserLeftRef.current || !analyserRightRef.current) return;
+
+    const leftData = new Uint8Array(analyserLeftRef.current.frequencyBinCount);
+    const rightData = new Uint8Array(analyserRightRef.current.frequencyBinCount);
+    analyserLeftRef.current.getByteFrequencyData(leftData);
+    analyserRightRef.current.getByteFrequencyData(rightData);
+
+    const leftAvg = leftData.reduce((a, b) => a + b, 0) / leftData.length / 255;
+    const rightAvg = rightData.reduce((a, b) => a + b, 0) / rightData.length / 255;
+
+    setLeftLevel(leftAvg);
+    setRightLevel(rightAvg);
+
+    animFrameRef.current = requestAnimationFrame(updateLevels);
+  }, []);
+
+  const stopAudio = useCallback(() => {
+    cleanup();
+    setIsPlaying(false);
+  }, [cleanup]);
+
+  const startTest = useCallback((mode: TestMode) => {
+    stopAudio();
+    setActiveMode(mode);
+
+    const ctx = new AudioContext();
+    audioContextRef.current = ctx;
+
+    const analyserLeft = ctx.createAnalyser();
+    analyserLeft.fftSize = 256;
+    analyserLeftRef.current = analyserLeft;
+
+    const analyserRight = ctx.createAnalyser();
+    analyserRight.fftSize = 256;
+    analyserRightRef.current = analyserRight;
+
+    const gainLeft = ctx.createGain();
+    gainLeft.gain.value = 0.3;
+    gainLeftRef.current = gainLeft;
+
+    const gainRight = ctx.createGain();
+    gainRight.gain.value = 0.3;
+    gainRightRef.current = gainRight;
+
+    const merger = ctx.createChannelMerger(2);
+
+    if (mode === 'left-right') {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 440;
+
+      const panLeft = ctx.createStereoPanner();
+      panLeft.pan.value = -1;
+      osc.connect(panLeft);
+      panLeft.connect(gainLeft);
+      gainLeft.connect(analyserLeft);
+      analyserLeft.connect(merger, 0, 0);
+
+      const panRight = ctx.createStereoPanner();
+      panRight.pan.value = 1;
+      osc.connect(panRight);
+      panRight.connect(gainRight);
+      gainRight.connect(analyserRight);
+      analyserRight.connect(merger, 0, 1);
+
+      osc.start();
+      oscLeftRef.current = osc;
+
+      // Alternate between ears
+      let isLeft = true;
+      intervalRef.current = setInterval(() => {
+        isLeft = !isLeft;
+        gainLeft.gain.value = isLeft ? 0.3 : 0;
+        gainRight.gain.value = isLeft ? 0 : 0.3;
+      }, 1500);
+
+      // Start with left
+      gainLeft.gain.value = 0.3;
+      gainRight.gain.value = 0;
+    } else if (mode === 'frequency-balance') {
+      const oscL = ctx.createOscillator();
+      oscL.type = 'sine';
+      oscL.frequency.value = leftFreq;
+      const panL = ctx.createStereoPanner();
+      panL.pan.value = -1;
+      oscL.connect(panL);
+      panL.connect(gainLeft);
+      gainLeft.connect(analyserLeft);
+      analyserLeft.connect(merger, 0, 0);
+      oscL.start();
+      oscLeftRef.current = oscL;
+
+      const oscR = ctx.createOscillator();
+      oscR.type = 'sine';
+      oscR.frequency.value = rightFreq;
+      const panR = ctx.createStereoPanner();
+      panR.pan.value = 1;
+      oscR.connect(panR);
+      panR.connect(gainRight);
+      gainRight.connect(analyserRight);
+      analyserRight.connect(merger, 0, 1);
+      oscR.start();
+      oscRightRef.current = oscR;
+    } else if (mode === 'stereo-separation') {
+      const oscL = ctx.createOscillator();
+      oscL.type = 'sine';
+      oscL.frequency.value = 200;
+      const panL = ctx.createStereoPanner();
+      panL.pan.value = -1;
+      oscL.connect(panL);
+      panL.connect(gainLeft);
+      gainLeft.connect(analyserLeft);
+      analyserLeft.connect(merger, 0, 0);
+      oscL.start();
+      oscLeftRef.current = oscL;
+
+      const oscR = ctx.createOscillator();
+      oscR.type = 'sine';
+      oscR.frequency.value = 4000;
+      const panR = ctx.createStereoPanner();
+      panR.pan.value = 1;
+      oscR.connect(panR);
+      panR.connect(gainRight);
+      gainRight.connect(analyserRight);
+      analyserRight.connect(merger, 0, 1);
+      oscR.start();
+      oscRightRef.current = oscR;
+    }
+
+    merger.connect(ctx.destination);
+    setIsPlaying(true);
+    animFrameRef.current = requestAnimationFrame(updateLevels);
+  }, [stopAudio, leftFreq, rightFreq, updateLevels]);
+
+  const faqs = [
+    {
+      q: 'How do I know if my headphones are balanced?',
+      a: 'When playing the Left/Right Channel test, the volume should be identical in both ears. If one side sounds louder, your headphones or your hearing may be imbalanced.'
+    },
+    {
+      q: 'What frequency should I use for testing?',
+      a: '440Hz (A4) is a good middle frequency for basic testing. The Frequency Balance mode lets you test with different frequencies in each ear to check for consistency across the spectrum.'
+    },
+    {
+      q: 'Why does stereo separation matter?',
+      a: 'Stereo separation ensures you hear the full spatial detail in music. If low frequencies leak into the right channel or high frequencies into the left, the stereo image collapses.'
+    },
+    {
+      q: 'Can I use this to test speakers too?',
+      a: 'Yes! While designed for headphones, this tool works with speakers too. Position yourself between two speakers and listen for the same left/right balance.'
+    },
+    {
+      q: 'My headphones sound different on each side. What should I do?',
+      a: 'First, try a different audio source to rule out software issues. If the imbalance persists across devices, your headphones may need professional repair or replacement.'
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#08080F]/90 backdrop-blur-md border-b border-[#1E1E2E]">
@@ -67,13 +283,13 @@ export default function Page() {
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
-            Headphone Testing
+            Audio Testing
           </p>
           <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">
-            Test Your Headphones with Precise Audio Tones
+            Headphone Test — Check Left/Right Balance
           </h1>
           <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">
-            Find dead spots, frequency drops, and distortion in any headphones. Generate test tones from 20Hz to 20kHz instantly.
+            Verify your headphones are properly balanced. Test stereo separation, frequency response, and channel balance in seconds.
           </p>
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">
             Free online tool · Works on mobile · No signup
@@ -82,8 +298,143 @@ export default function Page() {
       </section>
 
       <section id="audio-tool" className="pb-20 lg:pb-28">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AudioEngine />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Instructions */}
+          <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-6 mb-8">
+            <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-semibold text-[#E8ECF0] mb-4">
+              <Headphones className="w-5 h-5 inline mr-2 text-[#00E5CC]" />
+              How to Test
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4 text-sm text-[#6B7280]">
+              <div className="flex items-start gap-3">
+                <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">1</span>
+                <p>Put on your headphones and find a quiet environment</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">2</span>
+                <p>Select a test mode below and press Play</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">3</span>
+                <p>Listen carefully and watch the volume indicators</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Test Mode Selector */}
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
+            {testModes.map((t) => (
+              <button
+                key={t.mode}
+                onClick={() => {
+                  if (!isPlaying || activeMode !== t.mode) {
+                    startTest(t.mode);
+                  }
+                }}
+                className={`bg-[#0F0F1A] border rounded-2xl p-5 text-left transition-all ${
+                  activeMode === t.mode && isPlaying
+                    ? 'border-[#00E5CC] shadow-[0_0_20px_rgba(0,229,204,0.1)]'
+                    : 'border-[#1E1E2E] hover:border-[#2E2E3E]'
+                }`}
+              >
+                <h4 className="font-['Space_Grotesk',sans-serif] text-lg font-semibold text-[#E8ECF0] mb-2">
+                  {t.label}
+                </h4>
+                <p className="text-sm text-[#6B7280]">{t.description}</p>
+                {activeMode === t.mode && isPlaying && (
+                  <span className="inline-block mt-3 px-2 py-0.5 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs rounded-md">
+                    Playing
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Controls & Level Meters */}
+          <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+            {/* Frequency controls for frequency-balance mode */}
+            {activeMode === 'frequency-balance' && (
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
+                    LEFT CHANNEL — {leftFreq}Hz
+                  </label>
+                  <input
+                    type="range"
+                    min="20"
+                    max="2000"
+                    value={leftFreq}
+                    onChange={(e) => setLeftFreq(Number(e.target.value))}
+                    disabled={!isPlaying}
+                    className="w-full accent-[#00E5CC]"
+                  />
+                </div>
+                <div>
+                  <label className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] block mb-2">
+                    RIGHT CHANNEL — {rightFreq}Hz
+                  </label>
+                  <input
+                    type="range"
+                    min="20"
+                    max="2000"
+                    value={rightFreq}
+                    onChange={(e) => setRightFreq(Number(e.target.value))}
+                    disabled={!isPlaying}
+                    className="w-full accent-[#00E5CC]"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Volume Level Meters */}
+            <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="text-center">
+                <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mb-3">LEFT (L)</p>
+                <div className="h-48 bg-[#08080F] rounded-xl border border-[#1E1E2E] relative overflow-hidden flex items-end justify-center p-2">
+                  <div
+                    className="w-full bg-gradient-to-t from-[#00E5CC] to-[#00E5CC]/50 rounded-md transition-all duration-75"
+                    style={{ height: `${leftLevel * 100}%`, minHeight: leftLevel > 0 ? '4px' : '0' }}
+                  />
+                </div>
+                <p className="font-['JetBrains_Mono',monospace] text-xs text-[#E8ECF0] mt-2">
+                  {Math.round(leftLevel * 100)}%
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mb-3">RIGHT (R)</p>
+                <div className="h-48 bg-[#08080F] rounded-xl border border-[#1E1E2E] relative overflow-hidden flex items-end justify-center p-2">
+                  <div
+                    className="w-full bg-gradient-to-t from-[#00E5CC] to-[#00E5CC]/50 rounded-md transition-all duration-75"
+                    style={{ height: `${rightLevel * 100}%`, minHeight: rightLevel > 0 ? '4px' : '0' }}
+                  />
+                </div>
+                <p className="font-['JetBrains_Mono',monospace] text-xs text-[#E8ECF0] mt-2">
+                  {Math.round(rightLevel * 100)}%
+                </p>
+              </div>
+            </div>
+
+            {/* Play/Stop */}
+            <div className="flex justify-center gap-4">
+              {isPlaying ? (
+                <button
+                  onClick={stopAudio}
+                  className="flex items-center gap-2 px-8 py-3 bg-red-500/10 border border-red-500/30 text-red-400 font-['Space_Grotesk',sans-serif] font-semibold rounded-xl hover:bg-red-500/20 transition-colors"
+                >
+                  <VolumeX className="w-5 h-5" />
+                  Stop
+                </button>
+              ) : (
+                <button
+                  onClick={() => startTest(activeMode)}
+                  className="flex items-center gap-2 px-8 py-3 bg-[#00E5CC] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold rounded-xl hover:bg-[#00E5CC]/90 transition-colors"
+                >
+                  <Volume2 className="w-5 h-5" />
+                  Play
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -91,33 +442,33 @@ export default function Page() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">Use Cases</p>
-            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">What Will You Test?</h2>
+            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Why Test Your Headphones?</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Quality Check</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">New Headphone Quality Check</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> You bought headphones online. They sound off, but you can't tell if it's the bass, mids, or highs.</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Run a quick frequency sweep from 20Hz to 20kHz. Find the dead spot at 4kHz. Return window still open.</p>
-        </div>
-      </div>
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Channel Balance</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Left/Right Channel Balance Test</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> One ear sounds quieter than the other, but you're not sure if it's your hearing or the headphones.</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Play the same tone in both channels. Switch sides. Instantly identify if the imbalance is in the headphones or your ears.</p>
-        </div>
-      </div>
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Bass Response</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Bass Response Evaluation</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> Your headphones claim 'deep bass' but you're not feeling it. Is it the headphones or the music?</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Generate a 20Hz-200Hz sweep. Feel every frequency. Know exactly how low your headphones can go.</p>
-        </div>
-      </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Quality Check</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Verify New Headphones</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> You just bought new headphones but aren&apos;t sure if they&apos;re working correctly.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Run the channel test to confirm both drivers are equally balanced before the return window closes.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Production</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Monitor Mixing</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> You&apos;re mixing a track but your headphones might have an imbalance, affecting your mix decisions.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Confirm your monitoring environment is balanced, then mix with confidence knowing your headphones are accurate.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Diagnostics</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Troubleshoot Issues</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> One ear sounds different but you can&apos;t tell if it&apos;s the headphones or a software setting.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Isolate the problem by testing at different frequencies and stereo configurations.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -129,51 +480,17 @@ export default function Page() {
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
           <div className="space-y-3">
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">What frequency should I test my headphones at?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Start with a full sweep from 20Hz to 20kHz. Pay special attention to 100Hz (bass), 1kHz (mids), and 4kHz-8kHz (highs) — these are where most headphone issues appear.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">How do I know if my headphones have a dead driver?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Play a tone and switch ears. If one side is completely silent at all frequencies, you likely have a dead driver. Test multiple frequencies to confirm.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Can this damage my headphones?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          No. The tones are generated at normal listening volumes. Keep the volume at a comfortable level — if it sounds loud to your ears, it's loud for your headphones too.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">What's the difference between sine and square wave testing?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Sine waves test pure frequency response. Square waves add harmonics and are better for detecting distortion and ringing. Use sine for basic tests, square for advanced diagnostics.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Why do my headphones sound different on different devices?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Different devices have different output power and DAC quality. Test with the device you use most. If headphones sound bad on all devices, the issue is the headphones.
-        </div>
-      </details>
+            {faqs.map((faq, i) => (
+              <details key={i} className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
+                <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                  <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">{faq.q}</span>
+                  <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
+                </summary>
+                <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>
@@ -181,13 +498,13 @@ export default function Page() {
       <section className="py-24 lg:py-32 bg-gradient-to-b from-[#08080F] to-[#0A1518]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#E8ECF0] mb-6">
-            Start Testing Now
+            Check Your Headphones Now
           </h2>
           <p className="text-lg text-[#6B7280] mb-8 max-w-lg mx-auto">
-            The tool is free, works in your browser, and runs on any device.
+            Fast, free, and works on any device with a browser.
           </p>
           <a href="#audio-tool" className="inline-flex items-center px-8 py-4 bg-[#00E5CC] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-[#00E5CC]/90 transition-colors">
-            Open Tone Generator
+            Open Headphone Test
           </a>
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mt-4">
             No signup · No download · Works on any device

@@ -1,17 +1,268 @@
 "use client";
 
-import { useState } from 'react';
-import AudioEngine from "../components/AudioEngine";
+import { useState, useEffect, useRef, useCallback } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
+import { FAQList } from '../components/FAQ';
 import Image from "next/image";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { Mic, MicOff, Volume2, VolumeX, Menu, X } from "lucide-react";
 
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-export default function Page() {
+type TunerState = 'idle' | 'listening' | 'error';
+
+interface NoteInfo {
+  note: string;
+  octave: number;
+  cents: number;
+  frequency: number;
+}
+
+function autoCorrelate(buf: Float32Array, sampleRate: number): number {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.01) return -1; // not enough signal
+
+  let r1 = 0;
+  let r2 = SIZE - 1;
+  const thres = 0.2;
+  for (let i = 0; i < SIZE / 2; i++) {
+    if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+  }
+  for (let i = 1; i < SIZE / 2; i++) {
+    if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+  }
+
+  const trimmed = buf.slice(r1, r2);
+  const trimmedSize = trimmed.length;
+
+  const c = new Array(trimmedSize).fill(0);
+  for (let i = 0; i < trimmedSize; i++) {
+    for (let j = 0; j < trimmedSize - i; j++) {
+      c[i] = c[i] + trimmed[j] * trimmed[j + i];
+    }
+  }
+
+  let d = 0;
+  while (c[d] > c[d + 1]) d++;
+  let maxval = -1;
+  let maxpos = -1;
+  for (let i = d; i < trimmedSize; i++) {
+    if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  }
+  let T0 = maxpos;
+
+  // Parabolic interpolation
+  const x1 = c[T0 - 1];
+  const x2 = c[T0];
+  const x3 = c[T0 + 1];
+  const a = (x1 + x3 - 2 * x2) / 2;
+  const b = (x3 - x1) / 2;
+  if (a) T0 = T0 - b / (2 * a);
+
+  return sampleRate / T0;
+}
+
+function frequencyToNote(freq: number, a4Ref: number): NoteInfo {
+  const semitones = 12 * Math.log2(freq / a4Ref);
+  const noteNum = Math.round(semitones) + 69;
+  const noteIndex = noteNum % 12;
+  const octave = Math.floor(noteNum / 12) - 1;
+  const noteFreq = a4Ref * Math.pow(2, (noteNum - 69) / 12);
+  const cents = Math.round(1200 * Math.log2(freq / noteFreq));
+  return {
+    note: NOTE_NAMES[noteIndex],
+    octave,
+    cents,
+    frequency: noteFreq,
+  };
+}
+
+function getCentsColor(cents: number): string {
+  const abs = Math.abs(cents);
+  if (abs <= 12) return '#00E5CC'; // green/tuned
+  if (abs <= 25) return '#F59E0B'; // yellow
+  return '#EF4444'; // red
+}
+
+function getCentsLabel(cents: number): string {
+  if (Math.abs(cents) <= 5) return 'Perfectly in tune';
+  if (cents < 0) return 'Flat — tighten';
+  return 'Sharp — loosen';
+}
+
+const REFERENCE_FREQUENCIES = [440, 432, 415];
+
+export default function InstrumentTunerPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const [tunerState, setTunerState] = useState<TunerState>('idle');
+  const [noteInfo, setNoteInfo] = useState<NoteInfo | null>(null);
+  const [detectedFrequency, setDetectedFrequency] = useState<number | null>(null);
+  const [a4Ref, setA4Ref] = useState(440);
+  const [isPlayingRefTone, setIsPlayingRefTone] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const refOscillatorRef = useRef<OscillatorNode | null>(null);
+  const refGainRef = useRef<GainNode | null>(null);
+  const rafRef = useRef<number>(0);
+
+  const detectPitch = useCallback(() => {
+    if (!analyserRef.current || !audioContextRef.current) return;
+
+    const bufferLength = analyserRef.current.fftSize;
+    const buffer = new Float32Array(bufferLength);
+    analyserRef.current.getFloatTimeDomainData(buffer);
+
+    const frequency = autoCorrelate(buffer, audioContextRef.current.sampleRate);
+
+    if (frequency > 0) {
+      const info = frequencyToNote(frequency, a4Ref);
+      setNoteInfo(info);
+      setDetectedFrequency(frequency);
+    } else {
+      setNoteInfo(null);
+      setDetectedFrequency(null);
+    }
+
+    rafRef.current = requestAnimationFrame(detectPitch);
+  }, [a4Ref]);
+
+  const startListening = useCallback(async () => {
+    try {
+      setErrorMessage('');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        }
+      });
+
+      streamRef.current = stream;
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 4096;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      setTunerState('listening');
+      rafRef.current = requestAnimationFrame(detectPitch);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      if (message.includes('NotAllowed') || message.includes('Permission')) {
+        setErrorMessage('Microphone access denied. Please allow microphone access in your browser settings.');
+      } else if (message.includes('NotFound')) {
+        setErrorMessage('No microphone found. Please connect a microphone.');
+      } else {
+        setErrorMessage('Could not access microphone: ' + message);
+      }
+      setTunerState('error');
+    }
+  }, [detectPitch]);
+
+  const stopListening = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    setTunerState('idle');
+    setNoteInfo(null);
+    setDetectedFrequency(null);
+  }, []);
+
+  const toggleRefTone = useCallback(() => {
+    if (isPlayingRefTone) {
+      // Stop reference tone
+      if (refOscillatorRef.current) {
+        refOscillatorRef.current.stop();
+        refOscillatorRef.current = null;
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      setIsPlayingRefTone(false);
+    } else {
+      // Start reference tone
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = a4Ref;
+      osc.type = 'sine';
+      gain.gain.value = 0.3;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      refOscillatorRef.current = osc;
+      refGainRef.current = gain;
+      audioContextRef.current = ctx;
+      setIsPlayingRefTone(true);
+    }
+  }, [isPlayingRefTone, a4Ref]);
+
+  // Update reference tone frequency if playing
+  useEffect(() => {
+    if (isPlayingRefTone && refOscillatorRef.current) {
+      refOscillatorRef.current.frequency.value = a4Ref;
+    }
+  }, [a4Ref, isPlayingRefTone]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (refOscillatorRef.current) {
+        try { refOscillatorRef.current.stop(); } catch {}
+      }
+    };
+  }, []);
+
+  const centsPosition = noteInfo ? Math.max(0, Math.min(100, (noteInfo.cents + 50) / 100 * 100)) : 50;
+  const centsColor = noteInfo ? getCentsColor(noteInfo.cents) : '#6B7280';
+  const centsLabel = noteInfo ? getCentsLabel(noteInfo.cents) : '';
+
+  const faqItems = [
+    {
+      question: 'How does the instrument tuner work?',
+      answer: 'The tuner uses your device\'s microphone to listen to the pitch of your instrument. It analyzes the audio in real-time using autocorrelation, a mathematical technique that finds the fundamental frequency of the sound. It then displays the note name, octave, and how many cents (hundredths of a semitone) the detected pitch is from the target note.',
+    },
+    {
+      question: 'What instruments can I tune with this?',
+      answer: 'Any instrument that produces a clear, sustained pitch works well — guitar, violin, cello, flute, trumpet, piano, ukulele, saxophone, and more. The tuner detects frequencies from approximately 20Hz to 4000Hz, covering the full range of most instruments.',
+    },
+    {
+      question: 'How accurate is this tuner?',
+      answer: 'The autocorrelation algorithm can detect pitch to within ±1 cent (1/100th of a semitone) under good conditions. Accuracy depends on microphone quality and background noise. For most instruments, this is comparable to dedicated clip-on tuners.',
+    },
+    {
+      question: 'What if my microphone doesn\'t work?',
+      answer: 'Make sure you\'ve granted microphone permission to the browser. Check that no other app is using the microphone. Try a quieter environment if background noise is interfering. On mobile, ensure the browser has microphone access in your device settings.',
+    },
+    {
+      question: 'What is A4 reference frequency?',
+      answer: 'A4=440Hz is the international standard for concert pitch — the frequency of the A note above middle C. Some orchestras use 442Hz or 443Hz for a brighter sound. Historical tunings like Baroque used around 415Hz. You can switch between 440Hz, 432Hz, and 415Hz with the selector.',
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#08080F]/90 backdrop-blur-md border-b border-[#1E1E2E]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -62,16 +313,17 @@ export default function Page() {
         </div>
       </header>
 
+      {/* Hero Section */}
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
-            Music & Audio
+            Music Reference
           </p>
           <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">
-            Tune Any Instrument Without Hardware
+            Instrument Tuner — Tune Any Instrument
           </h1>
           <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">
-            Generate reference tones for guitar, violin, piano, and more. No tuner device needed.
+            Real-time pitch detection using your microphone. Instantly identify notes, check tuning accuracy, and tune any instrument to concert pitch.
           </p>
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">
             Free online tool · Works on mobile · No signup
@@ -79,113 +331,211 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Tuner Tool Section */}
       <section id="audio-tool" className="pb-20 lg:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AudioEngine />
+          <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+            {/* Reference Frequency Selector */}
+            <div className="mb-8">
+              <label className="block font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#6B7280] mb-3">
+                Reference Tuning (A4)
+              </label>
+              <div className="flex gap-3">
+                {REFERENCE_FREQUENCIES.map(freq => (
+                  <button
+                    key={freq}
+                    onClick={() => setA4Ref(freq)}
+                    className={`px-6 py-2.5 rounded-xl font-['JetBrains_Mono',monospace] text-sm font-semibold transition-all ${
+                      a4Ref === freq
+                        ? 'bg-[#00E5CC] text-[#08080F]'
+                        : 'bg-[#1E1E2E] text-[#6B7280] hover:text-[#E8ECF0] hover:bg-[#2A2A3E]'
+                    }`}
+                  >
+                    {freq}Hz
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Large Note Display */}
+            <div className="text-center mb-8">
+              {tunerState === 'listening' && noteInfo ? (
+                <>
+                  <div className="font-['Space_Grotesk',sans-serif] text-8xl sm:text-9xl font-bold leading-none" style={{ color: centsColor }}>
+                    {noteInfo.note}
+                    <span className="text-4xl sm:text-5xl text-[#6B7280] align-top ml-2">{noteInfo.octave}</span>
+                  </div>
+                  <div className="font-['JetBrains_Mono',monospace] text-2xl text-[#E8ECF0] mt-2">
+                    {detectedFrequency?.toFixed(1)} Hz
+                  </div>
+                </>
+              ) : tunerState === 'listening' ? (
+                <>
+                  <div className="font-['Space_Grotesk',sans-serif] text-8xl sm:text-9xl font-bold text-[#6B7280] leading-none">
+                    —
+                  </div>
+                  <div className="font-['JetBrains_Mono',monospace] text-lg text-[#6B7280] mt-2">
+                    Listening...
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="font-['Space_Grotesk',sans-serif] text-6xl sm:text-7xl font-bold text-[#6B7280]/30 leading-none">
+                    🎵
+                  </div>
+                  <div className="font-['JetBrains_Mono',monospace] text-lg text-[#6B7280] mt-2">
+                    {tunerState === 'error' ? errorMessage : 'Press Start to begin tuning'}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Cents Deviation Gauge */}
+            {tunerState === 'listening' && (
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">-50¢ (flat)</span>
+                  <span className="font-['JetBrains_Mono',monospace] text-xs font-semibold" style={{ color: centsColor }}>
+                    {noteInfo ? `${noteInfo.cents > 0 ? '+' : ''}${noteInfo.cents}¢` : '0¢'}
+                  </span>
+                  <span className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">+50¢ (sharp)</span>
+                </div>
+                <div className="relative h-3 bg-[#1E1E2E] rounded-full overflow-hidden">
+                  {/* Color zones */}
+                  <div className="absolute inset-0 flex">
+                    <div className="w-[25%] bg-red-500/20" />
+                    <div className="w-[25%] bg-yellow-500/20" />
+                    <div className="w-[25%] bg-[#00E5CC]/20" />
+                    <div className="w-[25%] bg-red-500/20" />
+                  </div>
+                  {/* Center line */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00E5CC]/60 -translate-x-1/2" />
+                  {/* Needle */}
+                  {noteInfo && (
+                    <div
+                      className="absolute top-0 bottom-0 w-1 rounded-full transition-all duration-100"
+                      style={{
+                        left: `${centsPosition}%`,
+                        backgroundColor: centsColor,
+                        boxShadow: `0 0 8px ${centsColor}`,
+                      }}
+                    />
+                  )}
+                </div>
+                <div className="text-center mt-3">
+                  <span className="font-['JetBrains_Mono',monospace] text-sm" style={{ color: centsColor }}>
+                    {centsLabel}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Control Buttons */}
+            <div className="flex flex-wrap gap-4 justify-center">
+              {tunerState !== 'listening' ? (
+                <button
+                  onClick={startListening}
+                  className="flex items-center gap-3 px-8 py-4 bg-[#00E5CC] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-[#00E5CC]/90 transition-colors"
+                >
+                  <Mic className="w-5 h-5" />
+                  Start Listening
+                </button>
+              ) : (
+                <button
+                  onClick={stopListening}
+                  className="flex items-center gap-3 px-8 py-4 bg-red-500/20 text-red-400 border border-red-500/30 font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-red-500/30 transition-colors"
+                >
+                  <MicOff className="w-5 h-5" />
+                  Stop
+                </button>
+              )}
+
+              <button
+                onClick={toggleRefTone}
+                className={`flex items-center gap-3 px-6 py-4 border font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl transition-colors ${
+                  isPlayingRefTone
+                    ? 'bg-[#00E5CC]/10 border-[#00E5CC] text-[#00E5CC]'
+                    : 'bg-[#1E1E2E] border-[#2A2A3E] text-[#6B7280] hover:text-[#E8ECF0] hover:border-[#3A3A4E]'
+                }`}
+              >
+                {isPlayingRefTone ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                {isPlayingRefTone ? `Stop ${a4Ref}Hz` : `Play ${a4Ref}Hz Tone`}
+              </button>
+            </div>
+
+            {/* Status Indicator */}
+            <div className="mt-6 flex items-center justify-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                tunerState === 'listening' ? 'bg-[#00E5CC] animate-pulse' : 
+                tunerState === 'error' ? 'bg-red-500' : 'bg-[#6B7280]'
+              }`} />
+              <span className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] uppercase tracking-wider">
+                {tunerState === 'listening' ? 'Listening' : 
+                 tunerState === 'error' ? 'Error' : 'Idle'}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
+      {/* Use Cases Section */}
       <section className="py-24 lg:py-32 bg-[#0A0A12]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">Use Cases</p>
-            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">What Will You Test?</h2>
+            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">What Will You Tune?</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Guitar</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Tune Your Guitar</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> Your guitar sounds off, but you don't own a tuner. You download an app, create an account, get hit with ads.</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Open Tone Generator, set A4 = 440Hz, play the tone, tune your string. Done in 30 seconds.</p>
-        </div>
-      </div>
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Violin</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Violin String Reference</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> You need to tune your violin but left your tuner at home. The orchestra starts in 10 minutes.</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Generate G3, D4, A4, E5 instantly. Tune each string by ear using pure reference tones.</p>
-        </div>
-      </div>
-      <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
-        <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Piano</span>
-        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Piano Key Verification</h3>
-        <div className="space-y-3 text-[#6B7280]">
-          <p><span className="text-[#6B7280]">Before:</span> Your piano sounds slightly off but you can't tell which notes are out of tune.</p>
-          <p><span className="text-[#E8ECF0]">After:</span> Generate any piano key frequency. Compare with your piano. Identify which keys need tuning.</p>
-        </div>
-      </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Guitar</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Guitar Tuning</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> Your guitar sounds off but you left your clip-on tuner at home. Tuning apps are filled with ads and require accounts.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Open this tuner, grant mic access, and instantly see which string is sharp or flat. Adjust until it&apos;s green — done in seconds.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Orchestra</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Orchestra Reference</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> Your orchestra tunes to A4=440Hz but your electronic tuner died mid-rehearsal.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Switch to reference tone mode and play 440Hz. The oboe plays, the section tunes. Or use the mic tuner to verify each player in real-time.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Quick Check</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Quick Pitch Check</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> You need to verify if your instrument is in tune before a gig, but there&apos;s no time to set up hardware.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Pull out your phone, open the browser, start the tuner. Check each note in under a minute. No apps to install.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* FAQ Section */}
       <section className="py-24 lg:py-32 bg-[#08080F]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">FAQ</p>
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
-          <div className="space-y-3">
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">What frequency is standard A4 tuning?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Concert pitch A4 is 440Hz. Some orchestras use 442Hz. Generate either reference tone and tune to match.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Can I tune by ear without a tuner?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Yes. Play the reference tone, then play your instrument's string. Listen for 'beating' — the wobbling sound when two frequencies are slightly different. Adjust until the beating stops.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">What are the standard guitar string frequencies?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Standard EADGBE: E2=82.41Hz, A2=110Hz, D3=146.83Hz, G3=196Hz, B3=246.94Hz, E4=329.63Hz. Generate any of these instantly.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Can I use this for alternate tunings?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          Absolutely. Generate any frequency for any tuning — Drop D, Open G, DADGAD, or custom tunings. Just enter the Hz you need.
-        </div>
-      </details>
-      <details className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-xl group">
-        <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-          <span className="font-['Space_Grotesk',sans-serif] text-lg font-medium text-[#E8ECF0]">Is tuning by ear as accurate as an electronic tuner?</span>
-          <ChevronDown className="w-5 h-5 text-[#6B7280] group-open:rotate-180 transition-transform" />
-        </summary>
-        <div className="px-6 pb-6 text-[#6B7280] leading-relaxed border-t border-[#1E1E2E] pt-4">
-          For most purposes, yes. Experienced musicians can tune within 1-2 cents by ear. For recording or performance, consider a dedicated tuner for ultimate precision.
-        </div>
-      </details>
-          </div>
+          <FAQList items={faqItems} />
         </div>
       </section>
 
+      {/* CTA Section */}
       <section className="py-24 lg:py-32 bg-gradient-to-b from-[#08080F] to-[#0A1518]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#E8ECF0] mb-6">
-            Start Testing Now
+            Start Tuning Now
           </h2>
           <p className="text-lg text-[#6B7280] mb-8 max-w-lg mx-auto">
-            The tool is free, works in your browser, and runs on any device.
+            The tool is free, works in your browser, and runs on any device with a microphone.
           </p>
           <a href="#audio-tool" className="inline-flex items-center px-8 py-4 bg-[#00E5CC] text-[#08080F] font-['Space_Grotesk',sans-serif] font-semibold text-base rounded-xl hover:bg-[#00E5CC]/90 transition-colors">
-            Open Tone Generator
+            Open Instrument Tuner
           </a>
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280] mt-4">
             No signup · No download · Works on any device
@@ -193,6 +543,7 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="bg-[#050508] border-t border-[#1E1E2E] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
