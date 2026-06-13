@@ -4,7 +4,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import { FAQList } from "../components/FAQ";
 import Image from "next/image";
-import { Menu, X, Play, Pause, Waves } from "lucide-react";
+import { Menu, X, Play, Pause, Waves, Download } from "lucide-react";
+import { downloadWav } from "../../lib/wav";
 
 const PRESETS = [
   { freq: 100, label: '100 Hz', desc: 'Low Bass' },
@@ -354,6 +355,15 @@ export default function Page() {
             >
               {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               {isPlaying ? 'Stop' : 'Play Sine Wave'}
+            </button>
+
+            {/* Download Button */}
+            <button
+              onClick={() => downloadWav(frequency, 2)}
+              className="w-full mt-3 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 bg-[#0F0F1A] border border-[#1E1E2E] text-[#6B7280] hover:bg-[#1E1E2E] hover:text-[#E8ECF0]"
+            >
+              <Download className="w-4 h-4" />
+              Download WAV (2s)
             </button>
 
             <div className="mt-4 text-center text-[#6B7280] text-xs">

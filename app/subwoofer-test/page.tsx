@@ -4,7 +4,10 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import DynamicCookieConsent from "../components/DynamicCookieConsent";
 import { FAQList } from "../components/FAQ";
 import Image from "next/image";
-import { Menu, X, Play, Pause } from "lucide-react";
+import { Menu, X, Play, Pause, Download } from "lucide-react";
+import { downloadWav } from "../../lib/wav";
+
+const SINGLE_FREQ_PRESETS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,6 +16,7 @@ export default function Page() {
   const [currentFreq, setCurrentFreq] = useState(20);
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
 
   const startFreq = 20;
   const endFreq = 200;
@@ -167,7 +171,52 @@ export default function Page() {
     setIsSweeping(false);
     setProgress(0);
     setCurrentFreq(startFreq);
+    setActivePreset(null);
   }, [cleanup, startFreq]);
+
+  // Single frequency playback
+  const playSingleFreq = useCallback(async (freq: number) => {
+    if (isPlayingRef.current) {
+      cleanup();
+    }
+    setActivePreset(freq);
+    setErrorMsg(null);
+
+    try {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMsg('Browser does not support Web Audio API');
+        return;
+      }
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new AC();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') await ctx.resume();
+      if (ctx.state !== 'running') {
+        setErrorMsg('Click the page first, then try again');
+        return;
+      }
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.value = 0.5;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+
+      oscRef.current = osc;
+      gainRef.current = gain;
+      isPlayingRef.current = true;
+      setCurrentFreq(freq);
+      setIsSweeping(false);
+    } catch (err: any) {
+      setErrorMsg('Audio failed: ' + (err?.message || 'Unknown error'));
+      setActivePreset(null);
+    }
+  }, [cleanup]);
 
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
@@ -278,6 +327,40 @@ export default function Page() {
               {isSweeping ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               {isSweeping ? 'Stop Sweep' : 'Start Subwoofer Test'}
             </button>
+
+            {/* Download Button */}
+            <button
+              onClick={() => downloadWav(60, 3, 'subwoofer-test-60hz.wav')}
+              className="w-full mt-3 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 bg-[#0F0F1A] border border-[#1E1E2E] text-[#6B7280] hover:bg-[#1E1E2E] hover:text-[#E8ECF0]"
+            >
+              <Download className="w-4 h-4" />
+              Download 60Hz Test Tone (3s)
+            </button>
+          </div>
+
+          {/* Single Frequency Test Buttons */}
+          <div className="mt-8 bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
+            <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-semibold text-[#E8ECF0] mb-2">
+              Quick Frequency Test
+            </h3>
+            <p className="text-sm text-[#6B7280] mb-4">
+              Click any button to play a continuous tone at that frequency. Click again to stop.
+            </p>
+            <div className="grid grid-cols-5 gap-2">
+              {SINGLE_FREQ_PRESETS.map((freq) => (
+                <button
+                  key={freq}
+                  onClick={() => activePreset === freq ? stopSweep() : playSingleFreq(freq)}
+                  className={`py-3 px-2 rounded-xl text-sm font-medium transition ${
+                    activePreset === freq
+                      ? 'bg-[#00E5CC] text-[#08080F]'
+                      : 'bg-[#08080F] text-[#6B7280] hover:bg-[#1E1E2E] border border-[#1E1E2E]'
+                  }`}
+                >
+                  {freq}Hz
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
