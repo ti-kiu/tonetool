@@ -18,6 +18,18 @@ export default function Page() {
     document.title = 'White Noise Generator - Sleep & Focus | Tone Generator';
   }, []);
   
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/white-noise');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/white-noise');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+  
   const audioContextRef = useRef<AudioContext | null>(null);
   const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);

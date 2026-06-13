@@ -15,6 +15,18 @@ export default function Page() {
   useEffect(() => {
     document.title = '440Hz Tuning Tone - Standard A4 Reference | Tone Generator';
   }, []);
+
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/440hz');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/440hz');
+      document.head.appendChild(newLink);
+    }
+  }, []);
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">

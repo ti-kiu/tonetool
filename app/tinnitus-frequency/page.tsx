@@ -65,6 +65,18 @@ export default function Page() {
     document.title = 'Tinnitus Frequency Matcher - Find Your Tone | Tone Generator';
   }, []);
 
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/tinnitus-frequency');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/tinnitus-frequency');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);

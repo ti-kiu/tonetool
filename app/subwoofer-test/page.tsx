@@ -16,6 +16,18 @@ export default function Page() {
   useEffect(() => {
     document.title = 'Subwoofer Test - Bass Frequency Sweep | Tone Generator';
   }, []);
+
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/subwoofer-test');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/subwoofer-test');
+      document.head.appendChild(newLink);
+    }
+  }, []);
   const [isSweeping, setIsSweeping] = useState(false);
   const [currentFreq, setCurrentFreq] = useState(20);
   const [progress, setProgress] = useState(0);

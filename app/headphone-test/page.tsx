@@ -42,6 +42,18 @@ export default function Page() {
     document.title = 'Headphone Test - Check Left/Right Balance | Tone Generator';
   }, []);
 
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/headphone-test');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/headphone-test');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscLeftRef = useRef<OscillatorNode | null>(null);
   const oscRightRef = useRef<OscillatorNode | null>(null);

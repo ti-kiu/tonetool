@@ -20,6 +20,18 @@ export default function Page() {
     document.title = 'Frequency Sweep - Test Speakers & Hearing | Tone Generator';
   }, []);
 
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/frequency-sweep');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/frequency-sweep');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscRef = useRef<OscillatorNode | null>(null);
   const gainRef = useRef<GainNode | null>(null);

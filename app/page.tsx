@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AudioEngine from "./components/AudioEngine";
 import DynamicCookieConsent from "./components/DynamicCookieConsent";
 import Image from "next/image";
@@ -23,6 +23,22 @@ import {
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Tone Generator - Free Online Tone & Frequency Generator';
+  }, []);
+
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org');
+      document.head.appendChild(newLink);
+    }
+  }, []);
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">

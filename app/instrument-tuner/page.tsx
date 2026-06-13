@@ -107,6 +107,18 @@ export default function InstrumentTunerPage() {
     document.title = 'Instrument Tuner - Tune Any Instrument | Tone Generator';
   }, []);
 
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/instrument-tuner');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/instrument-tuner');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);

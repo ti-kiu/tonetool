@@ -9,9 +9,6 @@ export const metadata: Metadata = {
   creator: "Tone Generator",
   publisher: "Tone Generator",
   robots: "index, follow",
-  alternates: {
-    canonical: "https://tonetool.org",
-  },
   openGraph: {
     type: "website",
     locale: "en_US",

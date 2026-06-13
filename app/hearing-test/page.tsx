@@ -46,6 +46,18 @@ export default function HearingTestPage() {
     document.title = 'Hearing Test - Check Your Frequency Range | Tone Generator';
   }, []);
 
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/hearing-test');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/hearing-test');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
   const audioCtxRef = useRef<AudioContext | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 

@@ -15,6 +15,18 @@ export default function Page() {
   useEffect(() => {
     document.title = '432Hz Tuning Tone - Alternative Pitch | Tone Generator';
   }, []);
+
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/432hz');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/432hz');
+      document.head.appendChild(newLink);
+    }
+  }, []);
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
