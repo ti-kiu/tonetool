@@ -34,7 +34,7 @@ The debate between 440Hz and 432Hz has been ongoing for decades. Musicians, audi
 
 ### Frequency Differences
 
-The difference between 440Hz and 432Hz is only about 1.8%. This means:
+The difference between 440Hz and 432Hz is only about **1.8%**. This means:
 
 - A song tuned to 432Hz is about **0.4 semitones lower** than 440Hz
 - The difference is barely noticeable to most listeners
@@ -48,6 +48,16 @@ The difference between 440Hz and 432Hz is only about 1.8%. This means:
 - Health benefits
 - Sound quality
 - Emotional response
+
+## Comparison Table
+
+| Aspect | 440Hz | 432Hz |
+|--------|-------|-------|
+| **ISO Standard** | Yes (1955) | No |
+| **Orchestral Use** | Worldwide | Rare |
+| **Frequency Difference** | Baseline | -1.8% |
+| **Scientific Support** | Strong | None |
+| **Historical Claim** | Modern standard | Mozart era (disputed) |
 
 ## Practical Considerations
 
@@ -77,6 +87,14 @@ You can easily compare 440Hz and 432Hz using online tools:
 Or use our dedicated tools:
 - [440Hz Tone Generator](https://tonetool.org/440hz)
 - [432Hz Tone Generator](https://tonetool.org/432hz)
+
+## Key Facts for Quick Reference
+
+- **440Hz** = International standard since 1955
+- **432Hz** = Alternative tuning, -1.8% frequency difference
+- **Difference** = 0.4 semitones (barely perceptible)
+- **Scientific consensus** = No proven benefits to 432Hz
+- **Best practice** = Use 440Hz for collaboration, 432Hz for personal preference
 
 ## The Bottom Line
 

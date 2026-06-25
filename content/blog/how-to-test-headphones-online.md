@@ -72,6 +72,14 @@ This test verifies that your headphones can properly separate left and right cha
 | Harsh highs | Frequency response | Try different ear tips or pads |
 | Muffled sound | Blockage | Clean ear tips, check for debris |
 
+## Key Facts About Headphone Testing
+
+- **440Hz** is the standard frequency for basic audio testing
+- Human hearing range is **20Hz to 20,000Hz**
+- Most headphone issues are detected in the **200Hz to 4000Hz** range
+- Testing takes **2-5 minutes** with online tools
+- **No software installation** is required for browser-based tests
+
 ## When to Consider Replacement
 
 If your headphones fail multiple tests or have明显 defects, it might be time for a replacement. Most manufacturers offer warranties for defective products.

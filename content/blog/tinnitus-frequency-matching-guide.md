@@ -68,6 +68,15 @@ Based on clinical data, the most common tinnitus frequencies are:
 
 **Important:** This is general information only. Always consult a healthcare professional for diagnosis and treatment.
 
+## Key Facts About Tinnitus
+
+- **50 million Americans** experience tinnitus
+- **20 million** have chronic tinnitus
+- **2 million** have debilitating tinnitus
+- **90%** of tinnitus cases are associated with hearing loss
+- **4000Hz** is the most commonly reported tinnitus frequency
+- Tinnitus can be **unilateral (one ear)** or **bilateral (both ears)**
+
 ## Tips for Accurate Matching
 
 1. **Take breaks** — Ear fatigue can affect your perception
