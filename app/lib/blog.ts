@@ -35,7 +35,11 @@ export function getAllPostSlugs(): string[] {
 export function getAllPostsMeta(): PostMeta[] {
   const slugs = getAllPostSlugs();
   const posts = slugs.map((slug) => {
-    const fullPath = path.join(postsDirectory, `${slug}.mdx`);
+    // Try .mdx first, then .md
+    let fullPath = path.join(postsDirectory, `${slug}.mdx`);
+    if (!fs.existsSync(fullPath)) {
+      fullPath = path.join(postsDirectory, `${slug}.md`);
+    }
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data } = parseMatter(fileContents);
     return {
@@ -50,7 +54,11 @@ export function getAllPostsMeta(): PostMeta[] {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const fullPath = path.join(postsDirectory, `${slug}.mdx`);
+  // Try .mdx first, then .md
+  let fullPath = path.join(postsDirectory, `${slug}.mdx`);
+  if (!fs.existsSync(fullPath)) {
+    fullPath = path.join(postsDirectory, `${slug}.md`);
+  }
   if (!fs.existsSync(fullPath)) return null;
   const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = parseMatter(fileContents);
