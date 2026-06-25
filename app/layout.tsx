@@ -94,6 +94,10 @@ export default function RootLayout({
               "softwareHelp": {
                 "@type": "CreativeWork",
                 "url": "https://tonetool.org/#faq"
+              },
+              "speakable": {
+                "@type": "SpeakableSpecification",
+                "cssSelector": ["h1", "h2", ".prose"]
               }
             })
           }}

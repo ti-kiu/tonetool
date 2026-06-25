@@ -184,8 +184,38 @@ export default function Page() {
     setCurrentFreq(startFreq);
   }, [cleanup, startFreq]);
 
+  // HowTo Schema for AEO/GEO
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Sweep Frequencies",
+    "description": "Learn how to use a frequency sweep to test speakers, find resonances, and identify audio dead spots.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Set frequencies",
+        "text": "Set start and end frequencies (default: 20Hz to 20kHz)"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Adjust duration",
+        "text": "Adjust sweep duration (slower = more detailed)"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Start sweep",
+        "text": "Click 'Start Sweep' — listen for peaks, drops, or rattles"
+      }
+    ]
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      {/* HowTo Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#08080F]/90 backdrop-blur-md border-b border-[#1E1E2E]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
