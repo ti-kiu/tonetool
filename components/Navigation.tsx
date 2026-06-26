@@ -39,14 +39,14 @@ export default function Navigation({ currentPage }: NavigationProps) {
           </Link>
           
           {/* Nav Links - Desktop */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="/#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+          <nav className="hidden lg:flex items-center gap-10">
+            <a href="/#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               How It Works
             </a>
-            <a href="/#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+            <a href="/#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               FAQ
             </a>
-            <a href="/#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
+            <a href="/#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               Use Cases
             </a>
             
@@ -54,7 +54,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
             <div className="relative">
               <button
                 onClick={() => setToolsOpen(!toolsOpen)}
-                className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
+                className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap"
               >
                 Tools
                 <ChevronDown className={`w-4 h-4 transition-transform ${toolsOpen ? "rotate-180" : ""}`} />
@@ -78,7 +78,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
             
             <Link
               href="/blog"
-              className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
+              className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap"
             >
               Blog
             </Link>
@@ -87,14 +87,14 @@ export default function Navigation({ currentPage }: NavigationProps) {
           {/* CTA */}
           <Link 
             href="/#audio-tool" 
-            className="hidden md:inline-flex items-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors"
+            className="hidden lg:inline-flex items-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors whitespace-nowrap"
           >
             Open Tool
           </Link>
           
           {/* Mobile menu button */}
           <button 
-            className="md:hidden text-[#E8ECF0]"
+            className="lg:hidden text-[#E8ECF0]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -103,15 +103,15 @@ export default function Navigation({ currentPage }: NavigationProps) {
         
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-[#1E1E2E]">
-            <nav className="flex flex-col gap-4">
-              <a href="/#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+          <div className="lg:hidden py-4 border-t border-[#1E1E2E]">
+            <nav className="flex flex-col gap-6">
+              <a href="/#how-it-works" className="block py-2 text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 How It Works
               </a>
-              <a href="/#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/#faq" className="block py-2 text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 FAQ
               </a>
-              <a href="/#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/#use-cases" className="block py-2 text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 Use Cases
               </a>
               
@@ -119,19 +119,19 @@ export default function Navigation({ currentPage }: NavigationProps) {
               <div>
                 <button
                   onClick={() => setToolsOpen(!toolsOpen)}
-                  className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
+                  className="flex items-center gap-1 py-2 text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
                 >
                   Tools
                   <ChevronDown className={`w-4 h-4 transition-transform ${toolsOpen ? "rotate-180" : ""}`} />
                 </button>
                 
                 {toolsOpen && (
-                  <div className="mt-2 ml-4 flex flex-col gap-2">
+                  <div className="mt-3 ml-4 flex flex-col gap-3">
                     {tools.map((tool) => (
                       <Link
                         key={tool.href}
                         href={tool.href}
-                        className="text-sm text-[#6B7280] hover:text-[#00E5CC] transition-colors"
+                        className="block py-1 text-[#6B7280] hover:text-[#00E5CC] transition-colors"
                         onClick={() => {
                           setToolsOpen(false);
                           setMobileMenuOpen(false);
@@ -146,7 +146,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
               
               <Link
                 href="/blog"
-                className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
+                className="block py-2 text-[#6B7280] hover:text-[#E8ECF0] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Blog
@@ -154,7 +154,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
               
               <Link 
                 href="/#audio-tool" 
-                className="inline-flex items-center justify-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors mt-2"
+                className="inline-flex items-center justify-center px-5 py-3 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors mt-4"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Open Tool
