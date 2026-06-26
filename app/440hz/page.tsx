@@ -9,8 +9,9 @@ import Image from "next/image";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 
+import Navigation from "../../components/Navigation";
 export default function Page() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
 
   useEffect(() => {
     document.title = '440Hz Tuning Tone - Standard A4 Reference | Tone Generator';
@@ -30,55 +31,7 @@ export default function Page() {
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#08080F]/90 backdrop-blur-md border-b border-[#1E1E2E]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <a href="/" className="flex items-center gap-2">
-                <Image src="/assets/logo.svg" alt="Tone Generator" width={24} height={24} />
-                <span className="font-['Space_Grotesk',sans-serif] font-bold text-lg text-[#E8ECF0]">
-                  Tone Generator
-                </span>
-              </a>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="/" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Home</a>
-              <a href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Blog</a>
-            </nav>
-            
-            <a 
-              href="#audio-tool" 
-              className="hidden md:inline-flex items-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors"
-            >
-              Open Tool
-            </a>
-            
-            <button 
-              className="md:hidden text-[#E8ECF0]"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-          
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-[#1E1E2E]">
-              <nav className="flex flex-col gap-4">
-                <a href="/" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Home</a>
-                <a href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors" onClick={() => setMobileMenuOpen(false)}>Blog</a>
-                <a 
-                  href="#audio-tool" 
-                  className="inline-flex items-center justify-center px-5 py-2.5 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-xl hover:bg-[#00E5CC]/10 transition-colors mt-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Open Tool
-                </a>
-              </nav>
-            </div>
-          )}
-        </div>
-      </header>
+      <Navigation />
 
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

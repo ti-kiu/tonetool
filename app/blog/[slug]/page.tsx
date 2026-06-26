@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getAllPostSlugs } from '../../lib/blog';
 
+import Navigation from "../../../components/Navigation";
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
   if (slugs.length === 0) {
@@ -29,23 +30,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   return (
     <main className="min-h-screen bg-[#08080F]">
       {/* Header */}
-      <header className="border-b border-[#1E1E2E]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-['Space_Grotesk',sans-serif] text-xl font-bold text-[#E8ECF0]">
-              Tone Generator
-            </span>
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">
-              Home
-            </Link>
-            <Link href="/blog" className="text-sm text-[#00E5CC]">
-              Blog
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Article */}
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
