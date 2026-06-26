@@ -36,10 +36,10 @@ export default function Navigation() {
           
           {/* Nav Links - single row */}
           <nav className="flex items-center gap-6 ml-8">
-            <a href="/#how-it-works" className="text-xs text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap hidden sm:inline">
+            <a href="/#how-it-works" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               How It Works
             </a>
-            <a href="/#faq" className="text-xs text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap hidden sm:inline">
+            <a href="/#faq" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               FAQ
             </a>
             
@@ -47,7 +47,7 @@ export default function Navigation() {
             <div className="relative">
               <button
                 onClick={() => setToolsOpen(!toolsOpen)}
-                className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap"
+                className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap"
               >
                 Tools
                 <ChevronDown className={`w-3 h-3 transition-transform ${toolsOpen ? "rotate-180" : ""}`} />
@@ -61,7 +61,7 @@ export default function Navigation() {
                       <Link
                         key={tool.href}
                         href={tool.href}
-                        className="block px-4 py-2 text-sm text-[#6B7280] hover:text-[#00E5CC] hover:bg-[#1E1E2E] transition-colors"
+                        className="block px-4 py-2 text-base text-[#6B7280] hover:text-[#00E5CC] hover:bg-[#1E1E2E] transition-colors"
                         onClick={() => setToolsOpen(false)}
                       >
                         {tool.name}
@@ -72,10 +72,10 @@ export default function Navigation() {
               )}
             </div>
             
-            <a href="/#use-cases" className="text-xs text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap hidden sm:inline">
+            <a href="/#use-cases" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               Use Cases
             </a>
-            <Link href="/blog" className="text-xs text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
+            <Link href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors whitespace-nowrap">
               Blog
             </Link>
           </nav>
@@ -83,7 +83,7 @@ export default function Navigation() {
           {/* CTA */}
           <Link 
             href="/#audio-tool" 
-            className="shrink-0 ml-4 px-4 py-2 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-xs rounded-lg hover:bg-[#00E5CC]/10 transition-colors whitespace-nowrap"
+            className="shrink-0 ml-4 px-4 py-2 border border-[#00E5CC] text-[#00E5CC] font-['Space_Grotesk',sans-serif] font-semibold text-sm rounded-lg hover:bg-[#00E5CC]/10 transition-colors whitespace-nowrap"
           >
             Open Tool
           </Link>
