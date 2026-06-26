@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Waves } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 const tools = [
   { name: "Headphone Test", href: "/headphone-test" },
@@ -27,7 +28,7 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Waves className="w-5 h-5 text-[#00E5CC]" />
+            <Image src="/assets/logo.svg" alt="Tone Generator" width={24} height={24} />
             <span className="font-['Space_Grotesk',sans-serif] font-bold text-base text-[#E8ECF0]">
               Tone Generator
             </span>
