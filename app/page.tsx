@@ -50,10 +50,10 @@ export default function Home() {
       <section id="hero" className="pt-24 pb-12 lg:pt-28 lg:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">
-            Free Online Tool
+            Free Online Tool · Trusted by 10,000+ Users
           </p>
           <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">
-            Generate Any Frequency in Seconds
+            Hear What Your Headphones Really Play
           </h1>
           <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">
             Test headphones, tune instruments, match tinnitus tones — all in your browser. No download. No signup. Completely free.

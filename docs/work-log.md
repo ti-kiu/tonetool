@@ -56,3 +56,30 @@
 - GA4 ID: `G-L7CZQ8T37C`
 - Bing 验证码: `8D5AE51845CFE08F58F54A68CFF76D57`
 - Sitemap: `https://tonetool.org/sitemap.xml`
+
+## 2026-07-01
+
+### Sitemap 修复
+- **问题**：sitemap.xml 只有 18 个页面 URL，缺少 12 篇博客文章
+- **修复**：更新 public/sitemap.xml，加入所有博客文章 URL（共 30 个页面）
+- **部署**：推送 master，Cloudflare Pages 自动构建成功
+
+### Google Search Console
+- **提交 sitemap**：用户提交 sitemap.xml，GSC 状态：成功，发现 30 个页面
+- **已索引页面**：homepage, frequency-sweep, headphone-test（3个）
+- **待索引**：12 篇博客文章 + 其他工具页面（需 Google 爬取，1-3 天）
+
+### 关键词研究
+- **API 限制**：discoverkeywords.co 学生账号只能获取共享缓存数据，无法自定义种子词
+- **降级方案**：用 SERP 手动分析，找到 5 个 A 级音频相关机会：
+  1. 1000hz test tone online
+  2. brown noise generator online free
+  3. speaker phase test online
+  4. interactive frequency chart
+  5. note to frequency chart online
+- **"Soccer 5" 分析**：判断为 D_SKIP（品牌词 + 与音频赛道无关）
+
+### 待办
+- [ ] 等 Google 爬取博客文章（1-3 天）
+- [ ] 用户可登录 GSC 逐个提交博客 URL 的 Request Indexing
+- [ ] 下次可做：brown noise generator 扩展、1000hz test tone 博客

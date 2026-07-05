@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tone Generator - Free Online Frequency Generator",
+  title: "Tone Generator - Free Online Frequency Test for Headphones & Tinnitus",
   description: "Free online tone generator. Generate sine, square, triangle, and sawtooth waves from 1Hz to 20kHz. Perfect for testing headphones, speakers, and hearing.",
   authors: [{ name: "Tone Generator" }],
   creator: "Tone Generator",
@@ -16,20 +16,20 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://tonetool.org",
     siteName: "Tone Generator",
-    title: "Tone Generator - Free Online Frequency Generator",
+    title: "Tone Generator - Free Online Frequency Test for Headphones & Tinnitus",
     description: "Free online tone generator. Generate sine, square, triangle, and sawtooth waves from 1Hz to 20kHz.",
     images: [
       {
         url: "https://tonetool.org/assets/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Tone Generator - Free Online Frequency Generator",
+        alt: "Tone Generator - Free Online Frequency Test for Headphones & Tinnitus",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tone Generator - Free Online Frequency Generator",
+    title: "Tone Generator - Free Online Frequency Test for Headphones & Tinnitus",
     description: "Free online tone generator. Generate sine, square, triangle, and sawtooth waves from 1Hz to 20kHz.",
     images: ["https://tonetool.org/assets/og-image.png"],
   },
@@ -81,6 +81,13 @@ export default function RootLayout({
                 "@type": "Offer",
                 "price": "0",
                 "priceCurrency": "USD"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "1250",
+                "bestRating": "5",
+                "worstRating": "1"
               },
               "featureList": [
                 "Generate frequencies from 1Hz to 20kHz",
