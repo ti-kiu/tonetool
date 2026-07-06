@@ -234,6 +234,18 @@ export default function Page() {
           <p className="font-['JetBrains_Mono',monospace] text-xs text-[#6B7280]">
             Free online tool · Works on mobile · No signup
           </p>
+          
+          {/* 工具截图 - 图片SEO */}
+          <div className="mt-8 mb-8">
+            <Image 
+              src="/images/tinnitus-match-tool.png" 
+              alt="Tinnitus Frequency Matcher - Find Your Tone Online"
+              width={800}
+              height={450}
+              className="rounded-xl border border-[#1E1E2E] mx-auto"
+              priority
+            />
+          </div>
         </div>
       </section>
 

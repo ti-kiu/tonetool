@@ -3,9 +3,14 @@
   <!-- Main Pages -->
   <url>
     <loc>https://tonetool.org</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://tonetool.org/images/tonetool-homepage.png</image:loc>
+      <image:title>Tone Generator - Free Online Frequency Tool</image:title>
+      <image:caption>Generate any frequency from 1Hz to 20kHz with our free online tone generator</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tonetool.org/blog</loc>
@@ -15,15 +20,25 @@
   </url>
   <url>
     <loc>https://tonetool.org/headphone-test</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://tonetool.org/images/headphone-test-tool.png</image:loc>
+      <image:title>Headphone Test - Check Left Right Balance Online</image:title>
+      <image:caption>Verify your headphones are properly balanced with our free online test tool</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tonetool.org/tinnitus-frequency</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://tonetool.org/images/tinnitus-match-tool.png</image:loc>
+      <image:title>Tinnitus Frequency Matcher - Find Your Tone Online</image:title>
+      <image:caption>Identify the exact pitch of your tinnitus by matching it with a precise tone</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tonetool.org/sine-wave-generator</loc>
@@ -39,15 +54,25 @@
   </url>
   <url>
     <loc>https://tonetool.org/frequency-sweep</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://tonetool.org/images/frequency-sweep-tool.png</image:loc>
+      <image:title>Frequency Sweep Tool - Test Speakers and Hearing Online</image:title>
+      <image:caption>Sweep through any frequency range from 20Hz to 20kHz to test speakers and hearing</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tonetool.org/instrument-tuner</loc>
-    <lastmod>2026-07-01</lastmod>
+    <lastmod>2026-07-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://tonetool.org/images/instrument-tuner-tool.png</image:loc>
+      <image:title>Instrument Tuner - Tune Any Instrument Online</image:title>
+      <image:caption>Real-time pitch detection using your microphone to tune any instrument</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://tonetool.org/subwoofer-test</loc>

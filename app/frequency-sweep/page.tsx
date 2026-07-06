@@ -224,6 +224,18 @@ export default function Page() {
           <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">Audio Testing</p>
           <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">Sweep Through Any Frequency Range</h1>
           <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">Find resonances, test speaker response, and identify audio dead spots. From 20Hz to 20kHz.</p>
+          
+          {/* 工具截图 - 图片SEO */}
+          <div className="mt-8 mb-8">
+            <Image 
+              src="/images/frequency-sweep-tool.png" 
+              alt="Frequency Sweep Tool - Test Speakers and Hearing Online"
+              width={800}
+              height={450}
+              className="rounded-xl border border-[#1E1E2E] mx-auto"
+              priority
+            />
+          </div>
         </div>
       </section>
 
