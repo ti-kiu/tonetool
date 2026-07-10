@@ -1,0 +1,444 @@
+"use client";
+
+import { useState, useRef, useCallback, useEffect } from 'react';
+import DynamicCookieConsent from "../components/DynamicCookieConsent";
+import { FAQList } from "../components/FAQ";
+import Image from "next/image";
+import { Menu, X, Play, Pause } from "lucide-react";
+
+import Navigation from "../../components/Navigation";
+export default function Page() {
+  
+  const [startFreq, setStartFreq] = useState(20);
+  const [endFreq, setEndFreq] = useState(20000);
+  const [duration, setDuration] = useState(10);
+  const [isSweeping, setIsSweeping] = useState(false);
+  const [currentFreq, setCurrentFreq] = useState(20);
+  const [progress, setProgress] = useState(0);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.title = 'Frequency Sweep - Test Speakers & Hearing | Tone Generator';
+  }, []);
+
+  useEffect(() => {
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) {
+      link.setAttribute('href', 'https://tonetool.org/frequency-sweep');
+    } else {
+      const newLink = document.createElement('link');
+      newLink.setAttribute('rel', 'canonical');
+      newLink.setAttribute('href', 'https://tonetool.org/frequency-sweep');
+      document.head.appendChild(newLink);
+    }
+  }, []);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const oscRef = useRef<OscillatorNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const isPlayingRef = useRef(false);
+  const startRef = useRef(0);
+
+  // Cleanup function — safe to call multiple times
+  const cleanup = useCallback(() => {
+    isPlayingRef.current = false;
+
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+
+    try {
+      if (oscRef.current) {
+        oscRef.current.onended = null;
+        oscRef.current.stop();
+        oscRef.current.disconnect();
+      }
+    } catch (_) { /* already stopped */ }
+
+    try {
+      if (gainRef.current) {
+        gainRef.current.disconnect();
+      }
+    } catch (_) {}
+
+    oscRef.current = null;
+    gainRef.current = null;
+  }, []);
+
+  // Unmount cleanup
+  useEffect(() => {
+    return () => {
+      cleanup();
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
+    };
+  }, [cleanup]);
+
+  const startSweep = useCallback(async () => {
+    if (isPlayingRef.current) return;
+    setErrorMsg(null);
+
+    try {
+      // 1. Get AudioContext constructor
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AC) {
+        setErrorMsg('Your browser does not support Web Audio API. Please use Chrome, Safari, or Edge.');
+        return;
+      }
+
+      // 2. Create or reuse AudioContext
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new AC();
+      }
+      const ctx = audioCtxRef.current;
+
+      // 3. Properly await resume
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
+      // 4. Verify context is running
+      if (ctx.state !== 'running') {
+        setErrorMsg('Audio could not start. Please click the page first, then try again.');
+        return;
+      }
+
+      // 5. Clean up any existing oscillator
+      cleanup();
+
+      // 6. Create oscillator and gain
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      // 7. Handle unexpected stop
+      osc.onended = () => {
+        if (isPlayingRef.current) {
+          cleanup();
+          setIsSweeping(false);
+          setProgress(0);
+          setCurrentFreq(startFreq);
+        }
+      };
+
+      osc.start();
+
+      oscRef.current = osc;
+      gainRef.current = gain;
+      isPlayingRef.current = true;
+      setIsSweeping(true);
+      setCurrentFreq(startFreq);
+      setProgress(0);
+      startRef.current = performance.now();
+
+      // 8. Animation loop using ref for isPlaying (not state)
+      const animate = (now: number) => {
+        if (!isPlayingRef.current) return;
+
+        const elapsed = (now - startRef.current) / 1000;
+        const prog = Math.min(elapsed / duration, 1);
+        const freq = startFreq * Math.pow(endFreq / startFreq, prog);
+
+        // Update oscillator frequency safely
+        try {
+          if (oscRef.current && audioCtxRef.current && audioCtxRef.current.state === 'running') {
+            oscRef.current.frequency.setValueAtTime(freq, audioCtxRef.current.currentTime);
+          }
+        } catch (_) {}
+
+        setCurrentFreq(Math.round(freq));
+        setProgress(prog * 100);
+
+        if (prog >= 1) {
+          // Sweep complete
+          cleanup();
+          setIsSweeping(false);
+          setProgress(0);
+          setCurrentFreq(startFreq);
+          return;
+        }
+
+        animFrameRef.current = requestAnimationFrame(animate);
+      };
+
+      animFrameRef.current = requestAnimationFrame(animate);
+    } catch (err: any) {
+      setErrorMsg('Audio failed to start: ' + (err?.message || 'Unknown error'));
+      cleanup();
+      setIsSweeping(false);
+    }
+  }, [startFreq, endFreq, duration, cleanup]);
+
+  const stopSweep = useCallback(() => {
+    cleanup();
+    setIsSweeping(false);
+    setProgress(0);
+    setCurrentFreq(startFreq);
+  }, [cleanup, startFreq]);
+
+  // HowTo Schema for AEO/GEO
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Sweep Frequencies",
+    "description": "Learn how to use a frequency sweep to test speakers, find resonances, and identify audio dead spots.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Set frequencies",
+        "text": "Set start and end frequencies (default: 20Hz to 20kHz)"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Adjust duration",
+        "text": "Adjust sweep duration (slower = more detailed)"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Start sweep",
+        "text": "Click 'Start Sweep' — listen for peaks, drops, or rattles"
+      }
+    ]
+  };
+
+  return (
+    <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      {/* HowTo Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <Navigation />
+
+      <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">Audio Testing</p>
+          <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">Sweep Through Any Frequency Range</h1>
+          <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">Find resonances, test speaker response, and identify audio dead spots. From 20Hz to 20kHz.</p>
+          
+          {/* 工具截图 - 图片SEO */}
+          <div className="mt-8 mb-8">
+            <Image 
+              src="/images/frequency-sweep-tool.png" 
+              alt="Frequency Sweep Tool - Test Speakers and Hearing Online"
+              width={800}
+              height={450}
+              className="rounded-xl border border-[#1E1E2E] mx-auto"
+              priority
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-6">
+          <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-semibold text-[#E8ECF0] mb-4">
+            <Play className="w-5 h-5 inline mr-2 text-[#00E5CC]" />
+            How to Sweep Frequencies
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4 text-sm text-[#6B7280]">
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">1</span>
+              <p>Set start and end frequencies (default: 20Hz to 20kHz)</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">2</span>
+              <p>Adjust sweep duration (slower = more detailed)</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="font-['JetBrains_Mono',monospace] text-[#00E5CC] font-bold">3</span>
+              <p>Click 'Start Sweep' — listen for peaks, drops, or rattles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section className="pb-20 lg:pb-28">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative bg-[#0F0F1A] border border-[#1E1E2E] rounded-3xl p-6 lg:p-8">
+
+            <div className="text-center mb-8">
+              <div className="text-6xl font-bold text-[#E8ECF0] tabular-nums">
+                {currentFreq.toLocaleString()}
+              </div>
+              <div className="text-[#6B7280] text-sm mt-1">Hz</div>
+            </div>
+
+            <div className="mb-8">
+              <div className="w-full h-3 bg-[#1E1E2E] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#00E5CC] to-[#00E5CC]/50 rounded-full transition-all duration-100"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-[#6B7280] mt-2">
+                <span>{startFreq} Hz</span>
+                <span>{Math.round(progress)}%</span>
+                <span>{endFreq} Hz</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="text-sm text-[#6B7280] mb-2 block">Start Frequency</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="19999"
+                  value={startFreq}
+                  onChange={(e) => setStartFreq(Math.max(1, Math.min(19999, Number(e.target.value))))}
+                  disabled={isSweeping}
+                  className="w-full bg-[#0F0F1A] border border-[#1E1E2E] rounded-lg px-4 py-2 text-[#E8ECF0] outline-none disabled:opacity-50"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-[#6B7280] mb-2 block">End Frequency</label>
+                <input
+                  type="number"
+                  min="2"
+                  max="20000"
+                  value={endFreq}
+                  onChange={(e) => setEndFreq(Math.max(2, Math.min(20000, Number(e.target.value))))}
+                  disabled={isSweeping}
+                  className="w-full bg-[#0F0F1A] border border-[#1E1E2E] rounded-lg px-4 py-2 text-[#E8ECF0] outline-none disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <label className="text-sm text-[#6B7280] mb-2 block">Duration: {duration}s</label>
+              <input
+                type="range"
+                min="1"
+                max="60"
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                disabled={isSweeping}
+                className="w-full h-2 bg-[#1E1E2E] rounded-lg appearance-none cursor-pointer accent-[#00E5CC] disabled:opacity-50"
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                {errorMsg}
+              </div>
+            )}
+
+            <button
+              onClick={isSweeping ? stopSweep : startSweep}
+              className={`w-full py-4 rounded-xl text-lg font-semibold transition flex items-center justify-center gap-2 ${
+                isSweeping
+                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30'
+                  : 'bg-[#00E5CC] text-[#08080F] hover:bg-[#00E5CC]/90'
+              }`}
+            >
+              {isSweeping ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+              {isSweeping ? 'Stop Sweep' : 'Start Sweep'}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 lg:py-32 bg-[#0A0A12]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">Use Cases</p>
+            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">What Will You Test?</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Speaker Test</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Test Full Speaker Response</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> Your speakers sound uneven, but you don&apos;t know which frequencies are problematic.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Run a slow sweep from 20Hz to 20kHz. Hear exactly where the response drops or peaks.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Resonance</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Find Room Resonances</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> Your room has weird booming or dead spots, but you can&apos;t identify the problem frequencies.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Sweep through low frequencies. Note where the volume jumps — those are your room resonances.</p>
+              </div>
+            </div>
+            <div className="bg-[#0F0F1A] border border-[#1E1E2E] rounded-2xl p-8">
+              <span className="inline-block px-3 py-1 bg-[#00E5CC]/10 text-[#00E5CC] font-['JetBrains_Mono',monospace] text-xs uppercase rounded-md mb-4">Hearing</span>
+              <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-semibold text-[#E8ECF0] mb-4">Map Your Hearing Range</h3>
+              <div className="space-y-3 text-[#6B7280]">
+                <p><span className="text-[#6B7280]">Before:</span> You wonder what your actual hearing range is, compared to the theoretical 20Hz-20kHz.</p>
+                <p><span className="text-[#E8ECF0]">After:</span> Sweep slowly. Note where you stop hearing. That&apos;s your personal hearing range.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 lg:py-32 bg-[#08080F]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <p className="font-['JetBrains_Mono',monospace] text-xs uppercase tracking-widest text-[#00E5CC] mb-4">FAQ</p>
+            <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
+          </div>
+          <FAQList
+            items={[
+              { question: "How fast should I sweep?", answer: "For detailed testing, sweep slowly — about 1 second per 100Hz. For quick checks, faster sweeps work fine. Adjust the slider speed to match your needs." },
+              { question: "What's the best range to test speakers?", answer: "Full range: 20Hz-20kHz. Focus on 100Hz-200Hz for bass quality, 1kHz-4kHz for vocal clarity, and 10kHz+ for treble detail." },
+              { question: "Can I sweep backwards (high to low)?", answer: "Yes. Set the starting frequency high and drag the slider down. Some issues are easier to notice when sweeping down." },
+              { question: "Why do some frequencies sound louder than others?", answer: "Human hearing is not flat — we're most sensitive to 2kHz-5kHz. Plus, your speakers/headphones and room acoustics affect perceived volume." },
+              { question: "Can I save a sweep recording?", answer: "Use your device's screen recording or audio recording software while running the sweep. The tool itself doesn't record audio." },
+            ]}
+          />
+        </div>
+      </section>
+
+      <footer className="bg-[#050508] border-t border-[#1E1E2E] py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Image src="/assets/logo.svg" alt="Tone Generator" width={20} height={20} />
+                <span className="font-['Space_Grotesk',sans-serif] font-bold text-[#E8ECF0]">Tone Generator</span>
+              </div>
+              <p className="text-sm text-[#6B7280]">Precise audio frequencies in your browser.</p>
+            </div>
+            <div>
+              <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Product</h4>
+              <ul className="space-y-2">
+                <li><a href="/" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Home</a></li>
+                <li><a href="/blog" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Blog</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Legal</h4>
+              <ul className="space-y-2">
+                <li><a href="/privacy" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Terms of Service</a></li>
+                <li><a href="/cookie-policy" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Cookie Policy</a></li>
+                <li><a href="/refund" className="text-sm text-[#6B7280] hover:text-[#E8ECF0] transition-colors">Refund Policy</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-['Space_Grotesk',sans-serif] font-semibold text-[#E8ECF0] mb-4">Contact</h4>
+              <a href="mailto:hello@tonetool.org" className="text-sm text-[#6B7280] hover:text-[#00E5CC] transition-colors">hello@tonetool.org</a>
+            </div>
+          </div>
+          <div className="border-t border-[#1E1E2E] pt-8">
+            <p className="font-['JetBrains_Mono',monospace] text-xs text-[#4B5563] text-center">&copy; 2026 Tone Generator. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      <DynamicCookieConsent />
+    </main>
+  );
+}
