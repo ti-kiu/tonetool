@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy | Tone Generator',
-  description: 'Cookie policy for Tone Generator (tonetool.org).',
+  description: 'Cookie policy for Tone Generator (tonetool.org). Learn how we use cookies and similar technologies on our free online audio testing platform.',
 };
 
 export default function CookiePolicy() {
