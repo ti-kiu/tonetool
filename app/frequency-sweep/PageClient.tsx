@@ -210,12 +210,38 @@ export default function Page() {
     ]
   };
 
+  const faqItems = [
+    { question: "How fast should I sweep?", answer: "For detailed testing, sweep slowly — about 1 second per 100Hz. For quick checks, faster sweeps work fine. Adjust the slider speed to match your needs." },
+    { question: "What's the best range to test speakers?", answer: "Full range: 20Hz-20kHz. Focus on 100Hz-200Hz for bass quality, 1kHz-4kHz for vocal clarity, and 10kHz+ for treble detail." },
+    { question: "Can I sweep backwards (high to low)?", answer: "Yes. Set the starting frequency high and drag the slider down. Some issues are easier to notice when sweeping down." },
+    { question: "Why do some frequencies sound louder than others?", answer: "Human hearing is not flat — we're most sensitive to 2kHz-5kHz. Plus, your speakers/headphones and room acoustics affect perceived volume." },
+    { question: "Can I save a sweep recording?", answer: "Use your device's screen recording or audio recording software while running the sweep. The tool itself doesn't record audio." },
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
       {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <Navigation />
 
@@ -390,13 +416,7 @@ export default function Page() {
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
           <FAQList
-            items={[
-              { question: "How fast should I sweep?", answer: "For detailed testing, sweep slowly — about 1 second per 100Hz. For quick checks, faster sweeps work fine. Adjust the slider speed to match your needs." },
-              { question: "What's the best range to test speakers?", answer: "Full range: 20Hz-20kHz. Focus on 100Hz-200Hz for bass quality, 1kHz-4kHz for vocal clarity, and 10kHz+ for treble detail." },
-              { question: "Can I sweep backwards (high to low)?", answer: "Yes. Set the starting frequency high and drag the slider down. Some issues are easier to notice when sweeping down." },
-              { question: "Why do some frequencies sound louder than others?", answer: "Human hearing is not flat — we're most sensitive to 2kHz-5kHz. Plus, your speakers/headphones and room acoustics affect perceived volume." },
-              { question: "Can I save a sweep recording?", answer: "Use your device's screen recording or audio recording software while running the sweep. The tool itself doesn't record audio." },
-            ]}
+            items={faqItems}
           />
         </div>
       </section>

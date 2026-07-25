@@ -207,8 +207,30 @@ export default function Page() {
     }
   }, [volume]);
 
+  const faqItems = [
+    { question: "What is a sine wave?", answer: "A sine wave is the simplest waveform — a smooth, periodic oscillation with no harmonics. It represents a single pure frequency. All other waveforms (square, triangle, sawtooth) are made up of multiple sine waves." },
+    { question: "Why use sine waves for testing?", answer: "Sine waves contain only one frequency, making them ideal for testing audio equipment. They reveal frequency response, distortion, and resonance without the complexity of harmonics found in other waveforms." },
+    { question: "What frequency should I use?", answer: "For general audio testing, 1kHz is the standard reference. For speaker testing, sweep from 20Hz to 20kHz. For hearing tests, use frequencies between 250Hz and 8kHz." },
+    { question: "Can I use this to test my hearing?", answer: "Yes, but use it at low volumes. Start with 1kHz at 50% volume and gradually increase. If you can't hear a frequency, note it — that may indicate hearing loss at that range." },
+    { question: "How is this different from other tone generators?", answer: "This tool generates a mathematically pure sine wave using the Web Audio API. No audio files, no samples — just a perfect digital oscillator. The wavelength calculation helps you understand the physical properties of the sound." },
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <Navigation />
 
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
@@ -414,13 +436,7 @@ export default function Page() {
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
           <FAQList
-            items={[
-              { question: "What is a sine wave?", answer: "A sine wave is the simplest waveform — a smooth, periodic oscillation with no harmonics. It represents a single pure frequency. All other waveforms (square, triangle, sawtooth) are made up of multiple sine waves." },
-              { question: "Why use sine waves for testing?", answer: "Sine waves contain only one frequency, making them ideal for testing audio equipment. They reveal frequency response, distortion, and resonance without the complexity of harmonics found in other waveforms." },
-              { question: "What frequency should I use?", answer: "For general audio testing, 1kHz is the standard reference. For speaker testing, sweep from 20Hz to 20kHz. For hearing tests, use frequencies between 250Hz and 8kHz." },
-              { question: "Can I use this to test my hearing?", answer: "Yes, but use it at low volumes. Start with 1kHz at 50% volume and gradually increase. If you can't hear a frequency, note it — that may indicate hearing loss at that range." },
-              { question: "How is this different from other tone generators?", answer: "This tool generates a mathematically pure sine wave using the Web Audio API. No audio files, no samples — just a perfect digital oscillator. The wavelength calculation helps you understand the physical properties of the sound." },
-            ]}
+            items={faqItems}
           />
         </div>
       </section>

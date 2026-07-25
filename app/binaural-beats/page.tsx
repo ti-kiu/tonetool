@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Page from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "Binaural Beats Generator — Free Online Brainwave Entrainment",
-  description: "Generate binaural beats online for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma frequencies. Free, works on any device.",
+  title: "Binaural Beats Generator [Free] — Focus, Sleep & Meditation Sounds (2025)",
+  description: "Generate binaural beats for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma brainwave frequencies. Try free — works on any device.",
   alternates: {
     canonical: "https://tonetool.org/binaural-beats",
   },
   openGraph: {
-    title: "Binaural Beats Generator — Free Online Brainwave Entrainment",
-    description: "Generate binaural beats online for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma frequencies. Free, works on any device.",
+    title: "Binaural Beats Generator [Free] — Focus, Sleep & Meditation Sounds (2025)",
+    description: "Generate binaural beats for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma brainwave frequencies. Try free — works on any device.",
     url: "https://tonetool.org/binaural-beats",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Binaural Beats Generator — Free Online Brainwave Entrainment",
-    description: "Generate binaural beats online for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma frequencies. Free, works on any device.",
+    title: "Binaural Beats Generator [Free] — Focus, Sleep & Meditation Sounds (2025)",
+    description: "Generate binaural beats for focus, sleep, and meditation. Choose delta, theta, alpha, beta, or gamma brainwave frequencies. Try free — works on any device.",
   },
 };
 

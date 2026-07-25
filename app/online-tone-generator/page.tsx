@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Page from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "Free Online Tone Generator — Generate Sine, Square, Sawtooth Waves",
-  description: "Generate pure tones from 1 Hz to 20 kHz online. Choose sine, square, triangle, or sawtooth waveforms. Free, no signup, works on mobile.",
+  title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
+  description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
   alternates: {
     canonical: "https://tonetool.org/online-tone-generator",
   },
   openGraph: {
-    title: "Free Online Tone Generator — Generate Sine, Square, Sawtooth Waves",
-    description: "Generate pure tones from 1 Hz to 20 kHz online. Choose sine, square, triangle, or sawtooth waveforms. Free, no signup, works on mobile.",
+    title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
+    description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
     url: "https://tonetool.org/online-tone-generator",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free Online Tone Generator — Generate Sine, Square, Sawtooth Waves",
-    description: "Generate pure tones from 1 Hz to 20 kHz online. Choose sine, square, triangle, or sawtooth waveforms. Free, no signup, works on mobile.",
+    title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
+    description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
   },
 };
 

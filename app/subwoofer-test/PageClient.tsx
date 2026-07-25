@@ -235,8 +235,30 @@ export default function Page() {
     }
   }, [cleanup]);
 
+  const faqItems = [
+    { question: "What frequencies should my subwoofer reproduce?", answer: "Most subwoofers handle 20Hz-200Hz. The crossover point with your main speakers is typically 80Hz-120Hz. Below 40Hz is deep bass that you feel more than hear." },
+    { question: "Why does bass sound different in different rooms?", answer: "Room modes are standing waves created by your room's dimensions. They boost some frequencies and cancel others. This is why subwoofer placement and room treatment matter." },
+    { question: "How do I know if my subwoofer is working properly?", answer: "Run this sweep. A good subwoofer should produce audible output from about 30Hz up. If you hear rattling, distortion, or sudden volume drops, there may be an issue." },
+    { question: "Should I use one or two subwoofers?", answer: "Two subwoofers in opposite corners can smooth out room modes and provide more even bass response throughout the room. One subwoofer is fine for smaller spaces." },
+    { question: "What's the best sweep speed for subwoofer testing?", answer: "For detailed analysis, use a slower sweep (10-15 seconds). This lets you hear subtle variations. For quick checks, 5 seconds works fine." },
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <Navigation />
 
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">
@@ -406,13 +428,7 @@ export default function Page() {
             <h2 className="font-['Space_Grotesk',sans-serif] text-3xl sm:text-4xl font-bold text-[#E8ECF0]">Common Questions</h2>
           </div>
           <FAQList
-            items={[
-              { question: "What frequencies should my subwoofer reproduce?", answer: "Most subwoofers handle 20Hz-200Hz. The crossover point with your main speakers is typically 80Hz-120Hz. Below 40Hz is deep bass that you feel more than hear." },
-              { question: "Why does bass sound different in different rooms?", answer: "Room modes are standing waves created by your room's dimensions. They boost some frequencies and cancel others. This is why subwoofer placement and room treatment matter." },
-              { question: "How do I know if my subwoofer is working properly?", answer: "Run this sweep. A good subwoofer should produce audible output from about 30Hz up. If you hear rattling, distortion, or sudden volume drops, there may be an issue." },
-              { question: "Should I use one or two subwoofers?", answer: "Two subwoofers in opposite corners can smooth out room modes and provide more even bass response throughout the room. One subwoofer is fine for smaller spaces." },
-              { question: "What's the best sweep speed for subwoofer testing?", answer: "For detailed analysis, use a slower sweep (10-15 seconds). This lets you hear subtle variations. For quick checks, 5 seconds works fine." },
-            ]}
+            items={faqItems}
           />
         </div>
       </section>
