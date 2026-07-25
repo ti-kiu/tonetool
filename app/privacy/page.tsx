@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Tone Generator',
-  description: 'Privacy policy for Tone Generator (tonetool.org). Learn how we collect, use, and protect your data.',
+  description: 'Privacy policy for Tone Generator (tonetool.org). Learn how we collect, use, store, and protect your personal data when using our free online audio testing tools.',
 };
 
 export default function PrivacyPolicy() {
