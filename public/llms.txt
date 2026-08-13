@@ -1,0 +1,53 @@
+# ToneTool
+
+> Free online tone generator and frequency generator. Generate audio signals from 1Hz to 20kHz in your browser.
+
+## What is ToneTool?
+
+ToneTool is a free online audio testing toolkit. Generate precise frequencies, test speakers and headphones, check your hearing, and more — all in your browser with no signup required.
+
+## Key Tools
+
+- **Tone Generator**: Generate sine, square, sawtooth & triangle waves from 1Hz to 20kHz
+- **Frequency Generator**: Precise audio signal generation for testing and calibration
+- **Online Tone Generator**: Browser-based tone generation with real-time control
+- **Sine Wave Generator**: Pure tone generation for audio testing
+- **Frequency Sweep Generator**: Sweep through frequency ranges to test speakers
+- **Hearing Test**: Check your hearing range online
+- **Headphone Test**: Verify left/right balance and audio quality
+- **Subwoofer Test**: Test bass response with low frequencies
+- **White Noise Generator**: Sleep, focus, and study sounds
+- **Binaural Beats**: Focus and meditation frequency tool
+- **440Hz / 432Hz Generator**: Reference tones for tuning and comparison
+- **Instrument Tuner**: Real-time pitch detection for tuning any instrument
+- **Tinnitus Frequency Matcher**: Find your exact tinnitus frequency
+
+## Pages
+
+- [Home](https://tonetool.org/) — Main tone generator tool
+- [Online Tone Generator](https://tonetool.org/online-tone-generator) — Browser-based tone generation
+- [Frequency Generator](https://tonetool.org/frequency-generator) — Audio signal generator
+- [Sine Wave Generator](https://tonetool.org/sine-wave-generator) — Pure sine tone
+- [Frequency Sweep](https://tonetool.org/frequency-sweep) — Sweep test tool
+- [Hearing Test](https://tonetool.org/hearing-test) — Check hearing range
+- [Headphone Test](https://tonetool.org/headphone-test) — Left/right balance test
+- [Subwoofer Test](https://tonetool.org/subwoofer-test) — Bass frequency test
+- [White Noise](https://tonetool.org/white-noise) — Sleep and focus sounds
+- [Binaural Beats](https://tonetool.org/binaural-beats) — Meditation frequencies
+- [440Hz](https://tonetool.org/440hz) — Standard tuning reference
+- [432Hz](https://tonetool.org/432hz) — Alternative tuning reference
+- [Instrument Tuner](https://tonetool.org/instrument-tuner) — Tune any instrument
+- [Tinnitus Frequency](https://tonetool.org/tinnitus-frequency) — Match your tinnitus
+
+## Features
+
+- 1Hz to 20kHz frequency range
+- 4 waveform types: sine, square, sawtooth, triangle
+- Real-time frequency and volume control
+- Works on mobile devices
+- No signup, no download, 100% free
+- WAV download support
+
+## Contact
+
+- Website: https://tonetool.org
