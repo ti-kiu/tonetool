@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service | Tone Generator',
   description: 'Terms of Service for Tone Generator (tonetool.org). Read our terms for using the free online tone generator, frequency tools, and audio testing features.',
+  alternates: { canonical: 'https://tonetool.org/terms' },
 };
 
 export default function TermsOfService() {

@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Refund Policy | Tone Generator',
   description: 'Refund policy for Tone Generator (tonetool.org). We offer a 14-day unconditional refund guarantee on all premium features and subscriptions.',
+  alternates: { canonical: 'https://tonetool.org/refund' },
 };
 
 export default function RefundPolicy() {
