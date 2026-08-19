@@ -10,11 +10,30 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 
 import Navigation from "../../components/Navigation";
+
+const faqItems = [
+  { question: "Does this tone generator work offline?", answer: "Once the page loads, the tone generation works without internet. However, you need a connection to initially load the page." },
+  { question: "Is there a limit to how long I can play a tone?", answer: "No limit. Play as long as you need. Just be mindful of volume to protect your hearing." },
+  { question: "Can I use this tone generator on iPhone/Android?", answer: "Yes. Works on all modern browsers including Safari, Chrome, and Firefox on both iOS and Android." },
+  { question: "Why is this online tone generator free?", answer: "The tool runs entirely in your browser — no server costs for tone generation. We keep it free because audio testing should be accessible to everyone." },
+  { question: "Can I share a specific frequency with someone?", answer: "Yes. Adjust the frequency, waveform, and volume, then copy the URL. All settings are encoded in the link." }
+];
+
 export default function Page() {
   
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": { "@type": "Answer", "text": faq.answer }
+    }))
+  };
   
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <Navigation />
 
       <section className="pt-24 pb-12 lg:pt-28 lg:pb-16">

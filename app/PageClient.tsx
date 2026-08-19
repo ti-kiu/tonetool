@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  
 
   useEffect(() => {
     document.title = 'Tone Generator - Free Online Tone & Frequency Generator';
@@ -40,9 +39,29 @@ export default function Home() {
       document.head.appendChild(newLink);
     }
   }, []);
-  
+
+  const faqItems = [
+    { question: "Is this tone generator really free?", answer: "Yes. The tone generator is completely free — all waveforms, full frequency range, visualization, and mobile support. No signup needed." },
+    { question: "Do I need to create an account?", answer: "No. The tool works instantly in your browser. We don't collect your email or personal data for basic use." },
+    { question: "How accurate are the frequencies?", answer: "Frequencies are generated digitally via the Web Audio API with sample-accurate timing. For most testing purposes — headphones, speakers, instrument tuning — the precision is more than sufficient. This is not a calibrated laboratory instrument." },
+    { question: "Can I use this for medical diagnosis?", answer: "No. Tone Generator is not a medical device. It can help you identify a tinnitus frequency to discuss with your doctor, but it cannot diagnose hearing loss or any medical condition. Always consult a healthcare professional." },
+    { question: "Is my audio data stored?", answer: "No. All audio generation happens locally in your browser. We never upload, store, or process your audio." },
+    { question: "How is this different from onlinetonegenerator.com?", answer: "Three things: cleaner design (no cluttered interface), better mobile experience, and no intrusive ads. We focus on doing one thing well — generating precise tones instantly." }
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": { "@type": "Answer", "text": faq.answer }
+    }))
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* Navigation */}
       <Navigation />
 
