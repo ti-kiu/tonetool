@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Page from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
-  description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
+  title: "Tone Generator Online — Free Frequency Generator 1Hz-20kHz (No Signup)",
+  description: "Free online tone generator. Generate sine, square, triangle & sawtooth waves from 1Hz to 20kHz instantly — no signup, no download. Test speakers, tune instruments, check hearing now.",
   alternates: {
     canonical: "https://tonetool.org/online-tone-generator",
   },
   openGraph: {
-    title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
-    description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
+    title: "Tone Generator Online — Free Frequency Generator 1Hz-20kHz (No Signup)",
+    description: "Free online tone generator. Generate sine, square, triangle & sawtooth waves from 1Hz to 20kHz instantly — no signup, no download. Test speakers, tune instruments, check hearing now.",
     url: "https://tonetool.org/online-tone-generator",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Online Tone Generator [Free] — Sine, Square & Sawtooth Waves (2025)",
-    description: "Generate pure tones from 1Hz to 20kHz. Choose sine, square, triangle, or sawtooth waveforms. Try free — no signup, works on any mobile device.",
+    title: "Tone Generator Online — Free Frequency Generator 1Hz-20kHz (No Signup)",
+    description: "Free online tone generator. Generate sine, square, triangle & sawtooth waves from 1Hz to 20kHz instantly — no signup, no download. Test speakers, tune instruments, check hearing now.",
   },
 };
 
