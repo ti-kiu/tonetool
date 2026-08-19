@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 
 const tools = [
+  { name: "Frequency Test", href: "/frequency-test" },
   { name: "Headphone Test", href: "/headphone-test" },
   { name: "Tinnitus Match", href: "/tinnitus-frequency" },
   { name: "Sine Wave", href: "/sine-wave-generator" },

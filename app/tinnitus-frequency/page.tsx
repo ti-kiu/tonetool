@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Page from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "Tinnitus Frequency Matcher [Free] — Find Your Exact Tinnitus Pitch (2025)",
-  description: "Match your tinnitus frequency with our free online tone generator. Identify the exact pitch of your ringing, buzzing, or hissing. Precise Hz control.",
+  title: "Tinnitus Frequency Finder [Free] — Find My Tinnitus Pitch Matching (2025)",
+  description: "Find your tinnitus frequency with our free online pitch matching tool. Identify the exact Hz of your ringing, buzzing, or hissing. Tinnitus frequency finder — try now.",
   alternates: {
     canonical: "https://tonetool.org/tinnitus-frequency",
   },
   openGraph: {
-    title: "Tinnitus Frequency Matcher [Free] — Find Your Exact Tinnitus Pitch (2025)",
-    description: "Match your tinnitus frequency with our free online tone generator. Identify the exact pitch of your ringing, buzzing, or hissing. Precise Hz control.",
+    title: "Tinnitus Frequency Finder [Free] — Find My Tinnitus Pitch Matching (2025)",
+    description: "Find your tinnitus frequency with our free online pitch matching tool. Identify the exact Hz of your ringing, buzzing, or hissing. Tinnitus frequency finder — try now.",
     url: "https://tonetool.org/tinnitus-frequency",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tinnitus Frequency Matcher [Free] — Find Your Exact Tinnitus Pitch (2025)",
-    description: "Match your tinnitus frequency with our free online tone generator. Identify the exact pitch of your ringing, buzzing, or hissing. Precise Hz control.",
+    title: "Tinnitus Frequency Finder [Free] — Find My Tinnitus Pitch Matching (2025)",
+    description: "Find your tinnitus frequency with our free online pitch matching tool. Identify the exact Hz of your ringing, buzzing, or hissing. Tinnitus frequency finder — try now.",
   },
 };
 

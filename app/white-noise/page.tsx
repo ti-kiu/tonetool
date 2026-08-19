@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Page from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "White Noise Generator [Free] — Sleep, Focus & Study Sounds (2025)",
-  description: "Generate white noise, pink noise, and brown noise for sleep, focus, and studying. Instant playback in your browser — try free, no signup required.",
+  title: "White Noise Generator Online [Free] — Sleep, Focus & Study Sounds (2025)",
+  description: "Free white noise generator online. Generate white, pink, and brown noise for sleep, focus, studying, and tinnitus relief. Instant playback in your browser, no signup.",
   alternates: {
     canonical: "https://tonetool.org/white-noise",
   },
   openGraph: {
-    title: "White Noise Generator [Free] — Sleep, Focus & Study Sounds (2025)",
-    description: "Generate white, pink, and brown noise online. Perfect for sleep, focus, studying, and tinnitus relief. Free, works on any device.",
+    title: "White Noise Generator Online [Free] — Sleep, Focus & Study Sounds (2025)",
+    description: "Free white noise generator online. Generate white, pink, and brown noise for sleep, focus, studying, and tinnitus relief. Instant playback in your browser, no signup.",
     url: "https://tonetool.org/white-noise",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "White Noise Generator [Free] — Sleep, Focus & Study Sounds (2025)",
-    description: "Generate white, pink, and brown noise online. Perfect for sleep, focus, studying, and tinnitus relief. Free, works on any device.",
+    title: "White Noise Generator Online [Free] — Sleep, Focus & Study Sounds (2025)",
+    description: "Free white noise generator online. Generate white, pink, and brown noise for sleep, focus, studying, and tinnitus relief. Instant playback in your browser, no signup.",
   },
 };
 

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import HearingTestPage from "./PageClient";
 
 export const metadata: Metadata = {
-  title: "Online Hearing Test [Free] — Check Your Hearing Range Instantly (2025)",
-  description: "Test your hearing range with calibrated tones from 250Hz to 8kHz. Quick audiometric screening in your browser — try free, works on mobile with headphones.",
+  title: "Hearing Range Test [Free] — Test Your Hearing Frequency Range Online (2025)",
+  description: "Test your hearing range with our free online hearing frequency range test. Sound generator with calibrated tones from 250Hz to 8kHz. Works on mobile with headphones.",
   alternates: {
     canonical: "https://tonetool.org/hearing-test",
   },
   openGraph: {
-    title: "Online Hearing Test [Free] — Check Your Hearing Range Instantly (2025)",
-    description: "Test your hearing range with calibrated tones from 250Hz to 8kHz. Quick audiometric screening in your browser — try free, works on mobile with headphones.",
+    title: "Hearing Range Test [Free] — Test Your Hearing Frequency Range Online (2025)",
+    description: "Test your hearing range with our free online hearing frequency range test. Sound generator with calibrated tones from 250Hz to 8kHz. Works on mobile with headphones.",
     url: "https://tonetool.org/hearing-test",
     siteName: "Tone Generator",
     locale: "en_US",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Online Hearing Test [Free] — Check Your Hearing Range Instantly (2025)",
-    description: "Test your hearing range with calibrated tones from 250Hz to 8kHz. Quick audiometric screening in your browser — try free, works on mobile with headphones.",
+    title: "Hearing Range Test [Free] — Test Your Hearing Frequency Range Online (2025)",
+    description: "Test your hearing range with our free online hearing frequency range test. Sound generator with calibrated tones from 250Hz to 8kHz. Works on mobile with headphones.",
   },
 };
 
