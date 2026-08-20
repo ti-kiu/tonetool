@@ -59,9 +59,38 @@ export default function Home() {
     }))
   };
 
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ToneTool",
+    "url": "https://tonetool.org",
+    "description": "Free online tone generator and frequency generator. Generate sine, square, sawtooth & triangle waves from 1Hz to 20kHz.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://tonetool.org/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ToneTool",
+    "url": "https://tonetool.org",
+    "logo": "https://tonetool.org/assets/logo.svg",
+    "sameAs": [],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "hello@tonetool.org",
+      "contactType": "customer service"
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#08080F] text-[#E8ECF0] font-['DM_Sans',sans-serif]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
       {/* Navigation */}
       <Navigation />
 
@@ -72,7 +101,7 @@ export default function Home() {
             Free Online Tool · Trusted by 10,000+ Users
           </p>
           <h1 className="font-['Space_Grotesk',sans-serif] text-4xl sm:text-5xl lg:text-6xl font-bold text-[#E8ECF0] leading-[1.1] mb-4">
-            Hear What Your Headphones Really Play
+            Free Online Tone Generator — Hear Any Frequency
           </h1>
           <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl mx-auto mb-6">
             Test headphones, tune instruments, match tinnitus tones — all in your browser. No download. No signup. Completely free.
